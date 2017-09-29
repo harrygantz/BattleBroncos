@@ -1,0 +1,3 @@
+Refactors:
+- check for input in Update, apply physics in FixedUpdate
+- define blast zone on level boundries not min/max camera pos
