@@ -16,11 +16,7 @@ public class AttackController : MonoBehaviour {
         Debug.Log(_animator.GetBool("playerStabbing"));
         if (Input.GetKey(KeyCode.X))
         {
-            _animator.SetBool("playerStabbing", true);
-        }
-        if (Input.GetKey(KeyCode.Z))
-        {
-            _animator.SetBool("playerStabbing", false);
+            _animator.SetTrigger("playerStabbing");
         }
     }
 }
