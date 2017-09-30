@@ -42,10 +42,9 @@ public class MovementController : MonoBehaviour
 		_controller.onTriggerExitEvent += onTriggerExitEvent;
 	}
 
+    #region Event Listeners
 
-	#region Event Listeners
-
-	void onControllerCollider( RaycastHit2D hit )
+    void onControllerCollider( RaycastHit2D hit )
 	{
 		// bail out on plain old ground hits cause they arent very interesting
 		if( hit.normal.y == 1f )
@@ -58,21 +57,17 @@ public class MovementController : MonoBehaviour
 
 	void onTriggerEnterEvent( Collider2D col )
 	{
-		Debug.Log( "onTriggerEnterEvent: " + col.gameObject.name );
 	}
 
 
 	void onTriggerExitEvent( Collider2D col )
 	{
-		Debug.Log( "onTriggerExitEvent: " + col.gameObject.name );
 	}
 
 	#endregion
 
 	void Update()
 	{
-        SpriteRenderer sr = GetComponent<SpriteRenderer>();
-
         if (_controller.isGrounded)
         {
             shouldResetVelocityY = true;
