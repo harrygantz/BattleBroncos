@@ -8,10 +8,12 @@ public class Player : MonoBehaviour {
     public Level thisLevel;
     public PlayerStats playerStats = new PlayerStats();
     public int playerIndex;
+    public bool takingDamage;
 
     void Start()
     {
         playerIndex = 0;
+        takingDamage = false;
     }
 
     void Update()
