@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class HitboxManager : MonoBehaviour
 {
-    private GameObject oldColliders;
+    private Transform oldCollidersTransform;
     public GameObject HitboxFolder;
 
     void OnTriggerEnter2D(Collider2D col)
@@ -16,7 +16,7 @@ public class HitboxManager : MonoBehaviour
     {
         if (hboxInfo == "Clear")
         {
-            oldColliders.SetActive(false);
+            setCollidersActive(oldCollidersTransform, false);
             return;
         }
 
@@ -24,12 +24,21 @@ public class HitboxManager : MonoBehaviour
         string hboxName = hboxArray[1];
         string hboxParentName = hboxArray[0];
 
-        if (oldColliders != null)
-            oldColliders.SetActive(false);
+        if (oldCollidersTransform != null)
+            setCollidersActive(oldCollidersTransform, false);
        
         GameObject hboxParent = HitboxFolder.transform.Find(hboxParentName).gameObject;
-        GameObject colliderObject = hboxParent.transform.Find(hboxName).gameObject;
-        colliderObject.SetActive(true);
-        oldColliders = colliderObject;
+        Transform collidersTransform = hboxParent.transform.Find(hboxName);
+
+        setCollidersActive(collidersTransform, true);
+        oldCollidersTransform = collidersTransform;
+    }
+
+    void setCollidersActive(Transform collidersTransform, bool active)
+    {
+        foreach(Transform child in collidersTransform)
+        {
+            child.gameObject.SetActive(active);
+        }
     }
 }
