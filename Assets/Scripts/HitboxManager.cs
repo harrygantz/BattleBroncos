@@ -7,11 +7,6 @@ public class HitboxManager : MonoBehaviour
     private Transform oldCollidersTransform;
     public GameObject HitboxFolder;
 
-    void OnTriggerEnter2D(Collider2D col)
-    {
-        Debug.Log("Collider hit something!");
-    }
-
     void setHitBox(string hboxInfo)
     {
         if (hboxInfo == "Clear")

@@ -13,10 +13,10 @@ public class AttackController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        Debug.Log(_animator.GetBool("playerStabbing"));
         if (Input.GetKey(KeyCode.X))
         {
             _animator.SetTrigger("playerStabbing");
         }
     }
+
 }

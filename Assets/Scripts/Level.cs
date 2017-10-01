@@ -6,6 +6,7 @@ public class Level : MonoBehaviour {
 
     public float yBlastZoneOffset = 5f;
     public float xBlastZoneOffset = 5f;
+    public Bounds bounds;
 
     public List<Transform> spawnPoints;
     public Level level;
@@ -13,7 +14,8 @@ public class Level : MonoBehaviour {
 	void Start () {
         foreach (GameObject spawnPoint in GameObject.FindGameObjectsWithTag("Respawn"))
         {
-            if(level == null)
+            bounds = transform.Find("background").gameObject.GetComponent<Renderer>().bounds;
+            if (level == null);
             {
                 level = GameObject.FindGameObjectWithTag("Level").GetComponent<Level>();
             }
@@ -27,4 +29,15 @@ public class Level : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public bool isBlasted(Transform t)
+    {
+        return (
+                 t.position.y <= (bounds.center.y - bounds.extents.y - yBlastZoneOffset) ||
+                 t.position.y >= (bounds.center.y + bounds.extents.y + yBlastZoneOffset) ||
+                 t.position.x <= (bounds.center.x - bounds.extents.x - xBlastZoneOffset) ||
+                 t.position.x >= (bounds.center.x + bounds.extents.x + xBlastZoneOffset)
+        );
+
+    }
 }
