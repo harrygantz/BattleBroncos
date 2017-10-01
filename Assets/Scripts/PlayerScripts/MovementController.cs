@@ -12,12 +12,13 @@ public class MovementController : MonoBehaviour
 	public float inAirDamping = 5f;
 	public float jumpHeight = 3f;
     //FixedUpdate Update bools
-    public bool shouldJump;
-    public bool shouldMoveRight;
-    public bool shouldMoveLeft;
-    public bool shouldFallThroughOneWay;
-    public bool shouldResetVelocityX;
-    public bool shouldResetVelocityY;
+    private bool shouldJump;
+    private bool shouldMoveRight;
+    private bool shouldMoveLeft;
+    private bool shouldFallThroughOneWay;
+    private bool shouldResetVelocityX;
+    private bool shouldResetVelocityY;
+    private bool preventMovement;
 	[HideInInspector]
 
 	private float normalizedHorizontalSpeed = 0;
@@ -68,38 +69,41 @@ public class MovementController : MonoBehaviour
 
 	void Update()
 	{
-        if (_controller.isGrounded)
+        if (!_player.preventInput)
         {
-            shouldResetVelocityY = true;
-            _animator.SetBool("playerJumping", false);
-        }
-        if ( Input.GetKey( KeyCode.RightArrow ) )
-		{
-            shouldMoveRight = true;
             if (_controller.isGrounded)
-                _animator.SetBool("playerWalking", true);
-        }
-        else if( Input.GetKey( KeyCode.LeftArrow ) )
-		{
-            shouldMoveLeft = true;
-            if (_controller.isGrounded)
-                _animator.SetBool("playerWalking", true);
-        }
-        else
-		{
-			normalizedHorizontalSpeed = 0;
-			if( _controller.isGrounded )
-                _animator.SetBool("playerWalking", false);
-		}
+            {
+                shouldResetVelocityY = true;
+                _animator.SetBool("playerJumping", false);
+            }
+            if (Input.GetKey(KeyCode.RightArrow))
+            {
+                shouldMoveRight = true;
+                if (_controller.isGrounded)
+                    _animator.SetBool("playerWalking", true);
+            }
+            else if (Input.GetKey(KeyCode.LeftArrow))
+            {
+                shouldMoveLeft = true;
+                if (_controller.isGrounded)
+                    _animator.SetBool("playerWalking", true);
+            }
+            else
+            {
+                normalizedHorizontalSpeed = 0;
+                if (_controller.isGrounded)
+                    _animator.SetBool("playerWalking", false);
+            }
 
-		if( _controller.isGrounded && Input.GetKeyDown( KeyCode.UpArrow ))
-        {
-            shouldJump = true;
-            _animator.SetBool("playerJumping", true);
-        }
+            if (_controller.isGrounded && Input.GetKeyDown(KeyCode.UpArrow))
+            {
+                shouldJump = true;
+                _animator.SetBool("playerJumping", true);
+            }
 
-		if( _controller.isGrounded && Input.GetKey( KeyCode.DownArrow ) )
-            shouldFallThroughOneWay = true;
+            if (_controller.isGrounded && Input.GetKey(KeyCode.DownArrow))
+                shouldFallThroughOneWay = true;
+        }
 	}
 
     void FixedUpdate()
@@ -144,9 +148,11 @@ public class MovementController : MonoBehaviour
         _velocity = _controller.velocity;
     }
 
-    public void knockBack(int knockBackAmt)
+    public void knockBack(float knockBackAmt)
     {
-        _player.takingDamage = true;
+        Vector2 knockback = new Vector2(knockBackAmt, 1.7f);
+        _controller.move(knockback);
     }
+
 
 }

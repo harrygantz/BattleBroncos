@@ -8,26 +8,30 @@ public class Player : MonoBehaviour {
     public CameraController mainCamera;
     public Level thisLevel;
     public PlayerStats playerStats = new PlayerStats();
-    public int playerIndex;
-    public bool takingDamage;
-    private bool invulerable;
-    public float invulnFramesOnHit;
     private CharacterController2D _controller;
+    private MovementController _movement;
+    public int playerIndex;
+    public bool preventInput;
+    public bool invulerable;
+    public float invulnFramesOnHit;
 
 
     void Start()
     {
         playerIndex = 0;
-        takingDamage = false;
-        invulerable = false;
     }
 
     void Awake()
     {
+        invulerable = false;
+        preventInput = false;
+        thisLevel = GameObject.FindGameObjectsWithTag("Level")[0].GetComponent<Level>();
+
         _controller = GetComponent<CharacterController2D>();
         _controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
+        _movement = GetComponent<MovementController>();
     }
 
     #region Event Listeners
@@ -57,7 +61,7 @@ public class Player : MonoBehaviour {
 
     void Update()
     {
-        if (isBlasted())
+        if (thisLevel.isBlasted(transform))
         {
             GameMaster.KillPlayer(this);
         }
@@ -67,42 +71,37 @@ public class Player : MonoBehaviour {
     {
         if (!invulerable)
         {
-            Debug.Log(invulerable);
+            _movement.knockBack(knockBackAmt);
             playerStats.health += damage;
-            Debug.Log(playerStats.health);
+            StartCoroutine(freezeInput(1f));
             StartCoroutine(setInvulnerable(invulnFramesOnHit));
             if (playerStats.health <= 0)
             {
                 GameMaster.KillPlayer(this);
             }
         }
-
+        
     }
 
     IEnumerator setInvulnerable(float invulnFrames)
     {
         invulerable = true;
-        Debug.Log(invulerable);
-
         yield return new WaitForSeconds(.0166f * invulnFrames);
         invulerable = false;
     }
 
-    public bool isBlasted()
+    IEnumerator freezeInput(float time)
     {
-        if (mainCamera != null)
-        {
-            return (
-                 transform.position.y <= (mainCamera.minCameraPos.y - thisLevel.yBlastZoneOffset) ||
-                 transform.position.y >= (mainCamera.maxCameraPos.y + thisLevel.yBlastZoneOffset) ||
-                 transform.position.x <= (mainCamera.minCameraPos.x - thisLevel.xBlastZoneOffset) ||
-                 transform.position.x >= (mainCamera.maxCameraPos.x + thisLevel.xBlastZoneOffset)
-             );
-        }
-        return false;
- 
+        preventInput = true;
+        yield return new WaitForSeconds(time);
+        preventInput = false;
     }
 
+    void OnDisable()
+    {
+        invulerable = false;
+        preventInput = false;
+    }
 
     [System.Serializable]
     public class PlayerStats

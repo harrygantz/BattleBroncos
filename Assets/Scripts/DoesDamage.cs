@@ -6,10 +6,11 @@ public class DoesDamage : MonoBehaviour {
 
     public int damage;
     public float knockBackAmt;
+    public Player player;
     // Use this for initialization
 
     void Start () {
-		
+        player = GetComponentInParent<Player>();
 	}
 	
 	// Update is called once per frame
@@ -19,10 +20,11 @@ public class DoesDamage : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D col)
     {
-        Player player = col.gameObject.GetComponentInParent<Player>();
-        if (player != null)
+
+        Player otherPlayer = col.gameObject.GetComponentInParent<Player>();
+        if (otherPlayer != null)
         {
-            player.takeDamage(damage, knockBackAmt);
+            otherPlayer.takeDamage(damage, knockBackAmt*player.transform.localScale.x);
         }
     }
 
