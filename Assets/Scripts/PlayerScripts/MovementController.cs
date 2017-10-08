@@ -11,16 +11,19 @@ public class MovementController : MonoBehaviour
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
 	public float inAirDamping = 5f;
 	public float jumpHeight = 3f;
+
     public string JumpButton = "Jump_P1";
     public string HorizontalControl = "Horizontal_P1";
     public string VerticalControl = "Vertical_P1";
     //FixedUpdate Update bools
     private bool shouldJump;
+    private bool canDoubleJump;
     private bool shouldMoveRight;
     private bool shouldMoveLeft;
     private bool shouldFallThroughOneWay;
     private bool shouldResetVelocityX;
     private bool shouldResetVelocityY;
+    private bool isBeingKnockedBack;
     private bool preventMovement;
 	[HideInInspector]
 
@@ -39,7 +42,6 @@ public class MovementController : MonoBehaviour
 		_animator = GetComponent<Animator>();
 		_controller = GetComponent<CharacterController2D>();
         _player = GetComponent<Player>();
-       
 
         shouldJump = false;
 		// listen to some events for illustration purposes
@@ -78,33 +80,41 @@ public class MovementController : MonoBehaviour
         {
             if (_controller.isGrounded)
             {
+                canDoubleJump = true;
                 shouldResetVelocityY = true;
                 _animator.SetBool("playerJumping", false);
             }
             if (Input.GetAxis(HorizontalControl) > 0.5)
             {
+                isBeingKnockedBack = false;
                 shouldMoveRight = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
             else if (Input.GetAxis(HorizontalControl) < -0.5)
             {
+                isBeingKnockedBack = false;
                 shouldMoveLeft = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
             else
             {
-                normalizedHorizontalSpeed = 0;
+                isBeingKnockedBack = false;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", false);
             }
-
-            if ( _controller.isGrounded && Input.GetButton(JumpButton))
+            if (Input.GetButton(JumpButton) && canDoubleJump)
             {
+                _player.stopInput(0.1f);
                 shouldJump = true;
+                if (!_controller.isGrounded)
+                {
+                    canDoubleJump = false;
+                }
                 _animator.SetBool("playerJumping", true);
             }
+
 
             if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < 0.5) && Input.GetButtonDown(JumpButton))
                 shouldFallThroughOneWay = true;
@@ -113,25 +123,40 @@ public class MovementController : MonoBehaviour
 
     void FixedUpdate()
     {
- 
         if (shouldMoveRight)
         {
             normalizedHorizontalSpeed = 1;
-            if (transform.localScale.x < 0f)
+            if (transform.localScale.x < 0f && _controller.isGrounded)
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             shouldMoveRight = false;
         }
-        if (shouldMoveLeft)
+        else if (shouldMoveLeft)
         {
             shouldMoveLeft = true;
             normalizedHorizontalSpeed = -1;
-            if (transform.localScale.x > 0f)
+            if (transform.localScale.x > 0f && _controller.isGrounded)
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             shouldMoveLeft = false;
+        }
+        else if (isBeingKnockedBack)
+        {
+            if (_controller.isGrounded)
+                normalizedHorizontalSpeed = 0;
+            else
+                normalizedHorizontalSpeed = _velocity.x < 0 ? -1 : 1;
+        }
+        else
+        {
+            normalizedHorizontalSpeed = 0;
         }
         if (shouldJump)
         {
             _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
+            if (isBeingKnockedBack)
+            {
+                isBeingKnockedBack = false;
+                _velocity.x = 0;
+            }
             shouldJump = false;
         }
         if (shouldFallThroughOneWay)
@@ -153,10 +178,30 @@ public class MovementController : MonoBehaviour
         _velocity = _controller.velocity;
     }
 
-    public void knockBack(float knockBackAmt)
+    public void resetVelocity()
     {
-        Vector2 knockback = new Vector2(knockBackAmt, 1.7f);
-        _controller.move(knockback);
+        _velocity = new Vector3(0, 0, 0);
+    }
+
+    public void movePlayer(float xAcceleration, float yAcceleration, float time)
+    {
+        //StartCoroutine(accellerateX(xAcceleration, time));
+        //StartCoroutine(accellerateY(yAcceleration, time/2));
+    }
+
+    //IEnumerator accellerateX(float x, float time)
+    //{
+
+    //}
+
+    //IEnumerator accellerateY(float y, float time)
+    //{
+
+    //}
+    public void knockBack(Vector3 knockBackAmt)
+    {
+        isBeingKnockedBack = true;
+        _velocity = knockBackAmt;
     }
 
 

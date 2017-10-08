@@ -66,13 +66,13 @@ public class Player : MonoBehaviour {
         }
     }
 
-    public void takeDamage(int damage, float knockBackAmt)
+    public void takeDamage(int damage, Vector3 knockBackAmt)
     {
         if (!invulerable)
         {
-            _movement.knockBack(knockBackAmt);
             playerStats.health += damage;
-            StartCoroutine(freezeInput(1f));
+            stopInput(1f);
+            _movement.knockBack(0.03f * playerStats.health * knockBackAmt);
             StartCoroutine(setInvulnerable(invulnFramesOnHit));
             if (playerStats.health <= 0)
             {
@@ -82,6 +82,10 @@ public class Player : MonoBehaviour {
         
     }
 
+    public void stopInput(float time)
+    {
+        StartCoroutine(freezeInput(time));
+    }
     IEnumerator setInvulnerable(float invulnFrames)
     {
         invulerable = true;
@@ -100,6 +104,8 @@ public class Player : MonoBehaviour {
     {
         invulerable = false;
         preventInput = false;
+        playerStats.health = 0;
+        _movement.resetVelocity();
     }
 
     [System.Serializable]

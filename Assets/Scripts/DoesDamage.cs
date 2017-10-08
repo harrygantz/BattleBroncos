@@ -5,8 +5,8 @@ using UnityEngine;
 public class DoesDamage : MonoBehaviour {
 
     public int damage;
-    public float knockBackAmt;
-    public Player player;
+    public Vector2 knockBackAmt;
+    private Player player;
     // Use this for initialization
 
     void Start () {
@@ -24,7 +24,7 @@ public class DoesDamage : MonoBehaviour {
         Player otherPlayer = col.gameObject.GetComponentInParent<Player>();
         if (otherPlayer != null)
         {
-            otherPlayer.takeDamage(damage, knockBackAmt*player.transform.localScale.x);
+            otherPlayer.takeDamage(damage, new Vector3(knockBackAmt.x * player.transform.localScale.x, knockBackAmt.y, 0));
         }
     }
 
