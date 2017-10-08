@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class HitboxManager : MonoBehaviour
 {
@@ -31,7 +32,7 @@ public class HitboxManager : MonoBehaviour
 
     void setCollidersActive(Transform collidersTransform, bool active)
     {
-        foreach(Transform child in collidersTransform)
+        foreach (Transform child in collidersTransform)
         {
             child.gameObject.SetActive(active);
         }
