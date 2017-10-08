@@ -11,6 +11,9 @@ public class MovementController : MonoBehaviour
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
 	public float inAirDamping = 5f;
 	public float jumpHeight = 3f;
+    public string JumpButton = "Jump_P1";
+    public string HorizontalControl = "Horizontal_P1";
+    public string VerticalControl = "Vertical_P1";
     //FixedUpdate Update bools
     private bool shouldJump;
     private bool shouldMoveRight;
@@ -22,11 +25,12 @@ public class MovementController : MonoBehaviour
 	[HideInInspector]
 
 	private float normalizedHorizontalSpeed = 0;
-	private CharacterController2D _controller;
-	private Animator _animator;
+	public CharacterController2D _controller;
+	public Animator _animator;
 	private RaycastHit2D _lastControllerColliderHit;
 	private Vector3 _velocity;
-    private Player _player;
+    public Player _player;
+
 
 
 
@@ -35,6 +39,7 @@ public class MovementController : MonoBehaviour
 		_animator = GetComponent<Animator>();
 		_controller = GetComponent<CharacterController2D>();
         _player = GetComponent<Player>();
+       
 
         shouldJump = false;
 		// listen to some events for illustration purposes
@@ -76,13 +81,13 @@ public class MovementController : MonoBehaviour
                 shouldResetVelocityY = true;
                 _animator.SetBool("playerJumping", false);
             }
-            if (Input.GetKey(KeyCode.RightArrow))
+            if (Input.GetAxis(HorizontalControl) > 0.5)
             {
                 shouldMoveRight = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
-            else if (Input.GetKey(KeyCode.LeftArrow))
+            else if (Input.GetAxis(HorizontalControl) < -0.5)
             {
                 shouldMoveLeft = true;
                 if (_controller.isGrounded)
@@ -95,13 +100,13 @@ public class MovementController : MonoBehaviour
                     _animator.SetBool("playerWalking", false);
             }
 
-            if (_controller.isGrounded && Input.GetKeyDown(KeyCode.UpArrow))
+            if ( _controller.isGrounded && Input.GetButton(JumpButton))
             {
                 shouldJump = true;
                 _animator.SetBool("playerJumping", true);
             }
 
-            if (_controller.isGrounded && Input.GetKey(KeyCode.DownArrow))
+            if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < 0.5) && Input.GetButtonDown(JumpButton))
                 shouldFallThroughOneWay = true;
         }
 	}
@@ -131,7 +136,7 @@ public class MovementController : MonoBehaviour
         }
         if (shouldFallThroughOneWay)
         {
-            _velocity.y *= 3f;
+            _velocity.y *= 1f;
             _controller.ignoreOneWayPlatformsThisFrame = true;
             shouldFallThroughOneWay = false;
         }

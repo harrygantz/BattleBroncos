@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class AttackController : MonoBehaviour {
 
-    private Animator _animator;
+    public string Stab = "Stab_P1";
+    public Animator _animator;
 
     // Use this for initialization
     void Start () {
@@ -13,10 +14,13 @@ public class AttackController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetKey(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.X) || Input.GetButton(Stab))
         {
-            _animator.SetTrigger("playerStabbing");
+            _animator.SetBool("playerStabbing", true);
         }
+        else
+            _animator.SetBool("playerStabbing", false);
+
     }
 
 }

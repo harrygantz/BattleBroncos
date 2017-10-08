@@ -5,11 +5,10 @@ using Prime31;
 
 public class Player : MonoBehaviour {
 
-    public CameraController mainCamera;
-    public Level thisLevel;
+    private Level thisLevel;
     public PlayerStats playerStats = new PlayerStats();
-    private CharacterController2D _controller;
-    private MovementController _movement;
+    public CharacterController2D _controller;
+    public MovementController _movement;
     public int playerIndex;
     public bool preventInput;
     public bool invulerable;

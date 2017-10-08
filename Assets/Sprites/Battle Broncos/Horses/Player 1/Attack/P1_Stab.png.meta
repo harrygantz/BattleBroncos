@@ -1,13 +1,15 @@
 fileFormatVersion: 2
-guid: e84457aafd1087a4f946e4acbe7e5dc4
-timeCreated: 1506663233
+guid: c765902c72f7b76498003729b45ed08e
+timeCreated: 1507418590
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: stab_0
-    21300002: stab_1
-    21300004: stab_2
-    21300006: stab_3
+    21300000: P1_Stab_0
+    21300002: P1_Stab_1
+    21300004: P1_Stab_2
+    21300006: P1_Stab_3
+    21300008: P1_Stab_4
+    21300010: P1_Stab_5
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -79,12 +81,12 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: stab_0
+      name: P1_Stab_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 42
+        width: 52
         height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -93,12 +95,12 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: stab_1
+      name: P1_Stab_1
       rect:
         serializedVersion: 2
-        x: 42
+        x: 52
         y: 0
-        width: 42
+        width: 52
         height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -107,12 +109,12 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: stab_2
+      name: P1_Stab_2
       rect:
         serializedVersion: 2
-        x: 84
+        x: 104
         y: 0
-        width: 42
+        width: 52
         height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -121,12 +123,40 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: stab_3
+      name: P1_Stab_3
       rect:
         serializedVersion: 2
-        x: 126
+        x: 156
         y: 0
-        width: 42
+        width: 52
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: P1_Stab_4
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 0
+        width: 52
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: P1_Stab_5
+      rect:
+        serializedVersion: 2
+        x: 260
+        y: 0
+        width: 52
         height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
