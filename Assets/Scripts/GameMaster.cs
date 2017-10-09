@@ -14,13 +14,15 @@ public class GameMaster : MonoBehaviour {
         if (gm == null)
         {
             gm = GameObject.FindGameObjectWithTag("GM").GetComponent<GameMaster>();
-        }   
+        }
     }
 
     public Transform player1Prefab;
     public Transform player2Prefab;
     public Transform SpawnPoint;
 
+  
+ 
     public void RespawnPlayer (Player player)
     {
         Transform spawnPoint = GameObject.FindGameObjectWithTag("Level").GetComponent<Level>().spawnPoints[player.playerIndex];
@@ -47,6 +49,12 @@ public class GameMaster : MonoBehaviour {
             camManager.players.Remove(player.transform);
         }
       
+    }
+
+    public static void UpdateHealth(string healthUiName, int playerHealth)
+    {
+        GameObject healthDisplay = GameObject.Find(healthUiName);
+        healthDisplay.GetComponent<NumberRenderer>().RenderNumber(playerHealth);
     }
 
 }

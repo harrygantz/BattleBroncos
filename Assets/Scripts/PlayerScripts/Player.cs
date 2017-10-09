@@ -12,6 +12,7 @@ public class Player : MonoBehaviour {
     public int playerIndex;
     public bool preventInput;
     public bool invulerable;
+    public string healthUIName;
     public float invulnFramesOnHit;
 
 
@@ -31,6 +32,7 @@ public class Player : MonoBehaviour {
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
         _movement = GetComponent<MovementController>();
+
     }
 
     #region Event Listeners
@@ -60,6 +62,7 @@ public class Player : MonoBehaviour {
 
     void Update()
     {
+        GameMaster.UpdateHealth(healthUIName, playerStats.health);
         if (thisLevel.isBlasted(transform))
         {
             GameMaster.KillPlayer(this);
@@ -112,5 +115,6 @@ public class Player : MonoBehaviour {
     public class PlayerStats
     {
         public int health = 0;
+        public int lives = 0;
     }
 }
