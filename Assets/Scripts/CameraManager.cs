@@ -28,6 +28,10 @@ public class CameraManager : MonoBehaviour {
         persp
     }
 
+    //Lock Y Axis
+    public float yLock;
+    public float xLock;
+
 	
 	void Start ()
     {
@@ -45,8 +49,11 @@ public class CameraManager : MonoBehaviour {
 
         midPoint = (players[1].position - players[0].position).normalized * half;
         midPoint += players[0].position;
-        
-        switch(cType)
+        if (midPoint.x < -xLock || midPoint.x > xLock)
+            midPoint.x = midPoint.x < -xLock ? -xLock : xLock;
+        if (midPoint.y < -yLock || midPoint.y > yLock)
+            midPoint.y = midPoint.y < -yLock ? -yLock : yLock;
+        switch (cType)
         {
             case CameraType.ortho:
 

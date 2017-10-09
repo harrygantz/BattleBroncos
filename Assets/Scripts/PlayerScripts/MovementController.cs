@@ -7,16 +7,23 @@ public class MovementController : MonoBehaviour
 {
 	// movement config
 	public float gravity = -25f;
-	public float runSpeed = 8f;
+    public float walkSpeed;
+	public float runSpeed;
+    public float airSpeed;
 	public float groundDamping = 20f; // how fast do we change direction? higher means faster
 	public float inAirDamping = 5f;
-	public float jumpHeight = 3f;
+    public float jumpHeight = 3f;
+    private float framesSpentWalking;
+
+
 
     public string JumpButton = "Jump_P1";
     public string HorizontalControl = "Horizontal_P1";
     public string VerticalControl = "Vertical_P1";
     //FixedUpdate Update bools
     private bool shouldJump;
+    private bool hasStartedRunning;
+    private bool shouldRun;
     private bool canDoubleJump;
     private bool shouldMoveRight;
     private bool shouldMoveLeft;
@@ -104,9 +111,8 @@ public class MovementController : MonoBehaviour
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", false);
             }
-            if (Input.GetButton(JumpButton) && canDoubleJump)
+            if (Input.GetButtonDown(JumpButton) && canDoubleJump)
             {
-                _player.stopInput(0.1f);
                 shouldJump = true;
                 if (!_controller.isGrounded)
                 {
@@ -123,11 +129,40 @@ public class MovementController : MonoBehaviour
 
     void FixedUpdate()
     {
+        float speed;
+        if (_controller.isGrounded)
+        {
+            framesSpentWalking = (_velocity.x < -1 || _velocity.x > 1) ? framesSpentWalking + 1 : 0;
+            if (framesSpentWalking > 30)
+            {
+                shouldRun = true;
+                transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(true);
+            }
+            if (framesSpentWalking == 0)
+            {
+                shouldRun = false;
+                transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
+            }
+            if (_velocity.x < -runSpeed || _velocity.x > runSpeed)
+            {
+                hasStartedRunning = true;
+            }
+            if (_velocity.x > -runSpeed && _velocity.x < runSpeed && hasStartedRunning)
+            {
+                framesSpentWalking = 0;
+                hasStartedRunning = false;
+            }
+        }
+        speed = shouldRun ? runSpeed : walkSpeed;
         if (shouldMoveRight)
         {
             normalizedHorizontalSpeed = 1;
             if (transform.localScale.x < 0f && _controller.isGrounded)
+            {
+                framesSpentWalking = 0;
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            }
+
             shouldMoveRight = false;
         }
         else if (shouldMoveLeft)
@@ -135,7 +170,10 @@ public class MovementController : MonoBehaviour
             shouldMoveLeft = true;
             normalizedHorizontalSpeed = -1;
             if (transform.localScale.x > 0f && _controller.isGrounded)
+            {
+                framesSpentWalking = 0;
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            }
             shouldMoveLeft = false;
         }
         else if (isBeingKnockedBack)
@@ -166,9 +204,10 @@ public class MovementController : MonoBehaviour
             shouldFallThroughOneWay = false;
         }
 
+         
         // apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
-        _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * runSpeed, Time.deltaTime * smoothedMovementFactor);
+        _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * speed, Time.deltaTime * smoothedMovementFactor);
 
         // apply gravity before moving
         _velocity.y += gravity * Time.deltaTime;
@@ -176,6 +215,8 @@ public class MovementController : MonoBehaviour
 
         // grab our current _velocity to use as a base for all calculations
         _velocity = _controller.velocity;
+
+  
     }
 
     public void resetVelocity()
