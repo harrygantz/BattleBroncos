@@ -38,6 +38,7 @@ public class CameraManager : MonoBehaviour {
         cam = Camera.main;
         cameraHolder = cam.transform.parent;
         cType = (cam.orthographic) ? CameraType.ortho : CameraType.persp;
+        //If we want to add more players we need to tag them here
         players.Add(GameObject.FindGameObjectWithTag("Player").transform);
         players.Add(GameObject.FindGameObjectWithTag("Player2").transform);
     }
@@ -53,6 +54,7 @@ public class CameraManager : MonoBehaviour {
             midPoint.x = midPoint.x < -xLock ? -xLock : xLock;
         if (midPoint.y < -yLock || midPoint.y > yLock)
             midPoint.y = midPoint.y < -yLock ? -yLock : yLock;
+
         switch (cType)
         {
             case CameraType.ortho:
@@ -86,7 +88,7 @@ public class CameraManager : MonoBehaviour {
         }
     public static CameraManager instance;
 
-    public static CameraManager GetInstance()
+    public static CameraManager GetInstanceCameraManager()
     {
         return instance;
     }

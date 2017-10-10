@@ -24,10 +24,6 @@ public class Level : MonoBehaviour {
             }
         }
     }
-	
-	void Update () {
-		
-	}
 
     public bool isBlasted(Transform t)
     {

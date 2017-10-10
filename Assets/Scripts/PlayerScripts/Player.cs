@@ -117,4 +117,5 @@ public class Player : MonoBehaviour {
         public int health = 0;
         public int lives = 0;
     }
+
 }
