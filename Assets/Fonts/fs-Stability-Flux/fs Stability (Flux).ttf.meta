@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: b5fb9f9a8a24642289818b6cd21e6151
+timeCreated: 1507605036
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: fs Stability (Flux)
+  fontNames:
+  - fs Stability (Flux)
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 9e32b909392fa4d9c91f178bcbca9fdd
+timeCreated: 1507605236
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: bb Just Pixels
+  fontNames:
+  - bb Just Pixels
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
