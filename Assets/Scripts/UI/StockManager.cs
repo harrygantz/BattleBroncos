@@ -6,9 +6,10 @@ using UnityEngine.UI;
 public class StockManager : MonoBehaviour {
 
     StockManager stockManager;
+
     private Level thisLevel;
+    public int stocksStart;
     private static int stocksMax = 6;
-    private int stocksStart = 3;
     private int stocksCurrent = 0;
 
     public Image[] playerStocks;
@@ -24,28 +25,16 @@ public class StockManager : MonoBehaviour {
     {
         stocksCurrent = stocksStart;
         CheckStockAmount();
-        
     }
 
-    private void FixedUpdate()
-    {
-        if (thisLevel.isBlasted(transform) == true)
-        {
-            RemoveStock();
-            CheckStockAmount();
-        }
-    }
-
-
-    public void CheckStockAmount()
-    {
-
+    public void CheckStockAmount() {
         for (int i = 0; i < stocksMax; i++)
         {
             if (stocksCurrent <= i)
             {
                 playerStocks[i].enabled = false;
-            } else
+            }
+            else
             {
                 playerStocks[i].enabled = true;
             }
@@ -59,6 +48,7 @@ public class StockManager : MonoBehaviour {
 
     public void RemoveStock()
     {
+        playerStocks[stocksCurrent-1].enabled = false;
         stocksCurrent--;
     }
 

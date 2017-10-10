@@ -15,10 +15,13 @@ public class Player : MonoBehaviour {
     public string healthUIName;
     public float invulnFramesOnHit;
 
+    private GameOver gameOverScreen;
+    private StockManager stockManager;
 
     void Start()
     {
         playerIndex = 0;
+        stockManager = GetComponent<StockManager>();
     }
 
     void Awake()
@@ -67,6 +70,11 @@ public class Player : MonoBehaviour {
         {
             GameMaster.KillPlayer(this);
         }
+        if (stockManager.GetCurrentStocks() <= 0)
+        {
+           GameMaster.GameOver();
+        }
+
     }
 
     public void takeDamage(int damage, Vector3 knockBackAmt)
@@ -74,7 +82,7 @@ public class Player : MonoBehaviour {
         if (!invulerable)
         {
             playerStats.health += damage;
-            stopInput(1f);
+            stopInput(0.5f);
             _movement.knockBack(0.03f * playerStats.health * knockBackAmt);
             StartCoroutine(setInvulnerable(invulnFramesOnHit));
             if (playerStats.health <= 0)
@@ -115,7 +123,6 @@ public class Player : MonoBehaviour {
     public class PlayerStats
     {
         public int health = 0;
-        public int lives = 0;
     }
 
 }

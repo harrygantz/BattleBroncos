@@ -37,6 +37,7 @@ public class GameMaster : MonoBehaviour {
         gm.RemoveCameraTransform(player);
         player.gameObject.SetActive(false);
         gm.RespawnPlayer(player);
+        player.GetComponent<StockManager>().RemoveStock();
     }
 
     public void RemoveCameraTransform(Player player)
@@ -52,6 +53,12 @@ public class GameMaster : MonoBehaviour {
     {
         GameObject healthDisplay = GameObject.Find(healthUiName);
         healthDisplay.GetComponent<NumberRenderer>().RenderNumber(playerHealth);
+    }
+
+    public static void GameOver()
+    {
+        CameraManager cm = CameraManager.GetInstanceCameraManager();
+        cm.GetComponent<GameOver>().SetGameOver();
     }
 
 }

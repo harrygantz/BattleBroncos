@@ -12,7 +12,6 @@ public class PauseMenu : MonoBehaviour {
     void Start()
     {
         PauseUI.SetActive(false);
-
     }
 
     void Update()
@@ -49,7 +48,7 @@ public class PauseMenu : MonoBehaviour {
 
     public void MainMenu()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene(0);
     }
 
     public void Quit()
