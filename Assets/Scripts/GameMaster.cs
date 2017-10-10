@@ -5,33 +5,30 @@ using UnityEngine;
 public class GameMaster : MonoBehaviour {
 
     public static GameMaster gm;
+    CameraManager cm;
+   // StockManager sm;
     public bool playerDead;
-    CameraManager camManager;
 
     void Start()
     {
-        camManager = CameraManager.GetInstance();
+        //sm = StockManager.GetInstanceStockManager();
+        cm = CameraManager.GetInstanceCameraManager();
         if (gm == null)
         {
             gm = GameObject.FindGameObjectWithTag("GM").GetComponent<GameMaster>();
         }
     }
 
-    public Transform player1Prefab;
-    public Transform player2Prefab;
     public Transform SpawnPoint;
-
-  
  
     public void RespawnPlayer (Player player)
     {
         Transform spawnPoint = GameObject.FindGameObjectWithTag("Level").GetComponent<Level>().spawnPoints[player.playerIndex];
         player.gameObject.transform.position = spawnPoint.position;
         player.gameObject.SetActive(true);
-
         //Connect camera to new spawned players transform
         gm.playerDead = false;
-        camManager.players.Add(player.transform);
+        cm.players.Add(player.transform);
     }
 
     public static void KillPlayer(Player player)
@@ -46,10 +43,10 @@ public class GameMaster : MonoBehaviour {
     {
         if (playerDead)
         {
-            camManager.players.Remove(player.transform);
-        }
-      
+            cm.players.Remove(player.transform);
+        } 
     }
+
 
     public static void UpdateHealth(string healthUiName, int playerHealth)
     {
