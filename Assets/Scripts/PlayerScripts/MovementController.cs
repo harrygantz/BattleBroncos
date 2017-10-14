@@ -44,6 +44,9 @@ public class MovementController : MonoBehaviour
     public Player _player;
 
 
+    private bool hittingLeftWall = false;
+    private bool hittingRightWall = false;
+    public float wallJumpSpeed = 5f;
 
 
     void Awake()
@@ -72,13 +75,21 @@ public class MovementController : MonoBehaviour
     }
 
 
-    void onTriggerEnterEvent(Collider2D col)
-    {
+    void onTriggerEnterEvent(Collider2D col) {
+        if (col.transform.tag == "Wall") {
+            if (col.transform.position.x < transform.position.x)
+                hittingLeftWall = true;
+            else
+                hittingRightWall = true;
+        }
     }
 
 
-    void onTriggerExitEvent(Collider2D col)
-    {
+    void onTriggerExitEvent(Collider2D col) {
+        if (col.transform.tag == "Wall") {
+            hittingLeftWall = false;
+            hittingRightWall = false;
+        }
     }
 
     #endregion
@@ -96,14 +107,16 @@ public class MovementController : MonoBehaviour
             if (Input.GetAxis(HorizontalControl) > 0.5)
             {
                 isBeingKnockedBack = false;
-                shouldMoveRight = true;
+                if (!hittingRightWall)
+                    shouldMoveRight = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
             else if (Input.GetAxis(HorizontalControl) < -0.5)
             {
                 isBeingKnockedBack = false;
-                shouldMoveLeft = true;
+                if (!hittingLeftWall)
+                    shouldMoveLeft = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
@@ -236,6 +249,17 @@ public class MovementController : MonoBehaviour
         {
             _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * currSpeed, Time.deltaTime * smoothedMovementFactor);
         }
+
+        // for the wall
+        if (!_controller.isGrounded && (hittingLeftWall && _velocity.x < 0 && transform.localScale.x == -1 ||
+                                        hittingRightWall && _velocity.x > 0 && transform.localScale.x == 1)) {
+
+            _velocity.x = -_velocity.x * wallJumpSpeed;
+            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            //hittingLeftWall = hittingRightWall = false;
+        }
+        else if (hittingLeftWall && _velocity.x < 0 || hittingRightWall && _velocity.x > 0)
+            _velocity.x = 0;
 
         // apply gravity before moving
         _velocity.y += gravity * Time.deltaTime;
