@@ -46,6 +46,7 @@ public class MovementController : MonoBehaviour
 
     private bool hittingLeftWall = false;
     private bool hittingRightWall = false;
+    private int jumps = 0;
     public float wallJumpSpeed = 5f;
 
 
@@ -101,9 +102,17 @@ public class MovementController : MonoBehaviour
             if (_controller.isGrounded)
             {
                 canDoubleJump = true;
+                _animator.SetBool("canDoubleJump", true);
                 shouldResetVelocityY = true;
                 _animator.SetBool("playerJumping", false);
+                _animator.SetBool("isGrounded", true);
+                _animator.SetInteger("jumpCount", jumps=0);
             }
+            else
+            { 
+                _animator.SetBool("isGrounded", false);
+            }
+
             if (Input.GetAxis(HorizontalControl) > 0.5)
             {
                 isBeingKnockedBack = false;
@@ -129,16 +138,22 @@ public class MovementController : MonoBehaviour
             if (Input.GetButtonDown(JumpButton) && canDoubleJump)
             {
                 shouldJump = true;
+                _animator.SetBool("canDoubleJump", true);
                 if (!_controller.isGrounded)
                 {
                     canDoubleJump = false;
+                    _animator.SetBool("canDoubleJump", false);
                 }
                 _animator.SetBool("playerJumping", true);
             }
 
+            if (Input.GetButtonDown(JumpButton))
+                _animator.SetInteger("jumpCount", jumps+=1);
+
+
 
             if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < 0.5) && Input.GetButtonDown(JumpButton))
-                shouldFallThroughOneWay = true;
+                shouldFallThroughOneWay = true;         
         }
     }
 
