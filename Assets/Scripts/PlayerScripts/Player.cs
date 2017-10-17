@@ -13,7 +13,8 @@ public class Player : MonoBehaviour {
     public bool preventInput;
     public bool invulerable;
     public string healthUIName;
-    public float invulnFramesOnHit;
+    public int invulnFramesOnHit;
+    public int hitStunFrames;
 
     private GameOver gameOverScreen;
     private StockManager stockManager;
@@ -82,9 +83,10 @@ public class Player : MonoBehaviour {
         if (!invulerable)
         {
             playerStats.health += damage;
-            stopInput(0.5f);
+            hitStunFrames = Mathf.RoundToInt(playerStats.health/4 + 10);
+            stopInput(hitStunFrames);
             _movement.knockBack(0.03f * playerStats.health * knockBackAmt);
-            StartCoroutine(setInvulnerable(invulnFramesOnHit));
+            StartCoroutine(setInvulnerable(10));
             if (playerStats.health <= 0)
             {
                 GameMaster.KillPlayer(this);
@@ -93,21 +95,24 @@ public class Player : MonoBehaviour {
         
     }
 
-    public void stopInput(float time)
+    public void stopInput(int time)
     {
         StartCoroutine(freezeInput(time));
     }
-    IEnumerator setInvulnerable(float invulnFrames)
+
+    IEnumerator setInvulnerable(int frames)
     {
         invulerable = true;
-        yield return new WaitForSeconds(.0166f * invulnFrames);
+        for (int i = 0; i < frames; i++)
+            yield return new WaitForEndOfFrame();
         invulerable = false;
     }
 
-    IEnumerator freezeInput(float time)
+    IEnumerator freezeInput(int time)
     {
         preventInput = true;
-        yield return new WaitForSeconds(time);
+        for(int i = 0; i < time; i++)
+            yield return new WaitForEndOfFrame();
         preventInput = false;
     }
 
