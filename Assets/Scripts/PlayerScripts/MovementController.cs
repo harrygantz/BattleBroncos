@@ -253,7 +253,7 @@ public class MovementController : MonoBehaviour
             horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
             vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
 
-            _velocity.x = horzVelocity * transform.localScale.x + -preserveVelocityForWallJump;
+            _velocity.x = horzVelocity * transform.localScale.x;
             _velocity.y = vertVelocity;
         }
         else if (shouldJump)
