@@ -14,9 +14,10 @@ public class MovementController : MonoBehaviour
     public float groundDamping = 20f; // how fast do we change direction? higher means faster
     public float inAirDamping = 5f;
     public float jumpHeight = 3f;
-    private float currSpeed;
-    public bool debug;
+
     private float framesSpentCharging;
+    private float currSpeed;
+    private int jumps = 0;
 
     public string JumpButton = "Jump_P1";
     public string HorizontalControl = "Horizontal_P1";
@@ -24,6 +25,7 @@ public class MovementController : MonoBehaviour
     public string ChargeButton;
     //FixedUpdate Update bools
     private bool shouldJump;
+    private bool shouldWallJump;
     private bool hasStartedRunning;
     private bool shouldRun;
     private bool canDoubleJump;
@@ -43,12 +45,9 @@ public class MovementController : MonoBehaviour
     private Vector3 _velocity;
     public Player _player;
 
-
-    private bool hittingLeftWall = false;
-    private bool hittingRightWall = false;
-    private int jumps = 0;
-    public float wallJumpSpeed = 5f;
-
+    private bool collidingWithWall = false;
+    public float wallJumpAngle;
+    public float wallJumpIntensity;
 
     void Awake()
     {
@@ -76,20 +75,20 @@ public class MovementController : MonoBehaviour
     }
 
 
-    void onTriggerEnterEvent(Collider2D col) {
-        if (col.transform.tag == "Wall") {
-            if (col.transform.position.x < transform.position.x)
-                hittingLeftWall = true;
-            else
-                hittingRightWall = true;
+    void onTriggerEnterEvent(Collider2D col)
+    {
+        if (col.transform.tag == "Wall")
+        {
+            collidingWithWall = true;
         }
     }
 
 
-    void onTriggerExitEvent(Collider2D col) {
-        if (col.transform.tag == "Wall") {
-            hittingLeftWall = false;
-            hittingRightWall = false;
+    void onTriggerExitEvent(Collider2D col)
+    {
+        if (col.transform.tag == "Wall")
+        {
+            collidingWithWall = false;
         }
     }
 
@@ -101,31 +100,28 @@ public class MovementController : MonoBehaviour
         {
             if (_controller.isGrounded)
             {
+                shouldResetVelocityY = true;
                 canDoubleJump = true;
                 _animator.SetBool("canDoubleJump", true);
-                shouldResetVelocityY = true;
                 _animator.SetBool("playerJumping", false);
                 _animator.SetBool("isGrounded", true);
-                _animator.SetInteger("jumpCount", jumps=0);
-            }
-            else
-            { 
+                _animator.SetInteger("jumpCount", jumps = 0);
+
+            }  else
+            {
                 _animator.SetBool("isGrounded", false);
             }
-
             if (Input.GetAxis(HorizontalControl) > 0.5)
             {
                 isBeingKnockedBack = false;
-                if (!hittingRightWall)
-                    shouldMoveRight = true;
+                shouldMoveRight = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
             else if (Input.GetAxis(HorizontalControl) < -0.5)
             {
                 isBeingKnockedBack = false;
-                if (!hittingLeftWall)
-                    shouldMoveLeft = true;
+                shouldMoveLeft = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
@@ -135,7 +131,12 @@ public class MovementController : MonoBehaviour
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", false);
             }
-            if (Input.GetButtonDown(JumpButton) && canDoubleJump)
+            if (!_controller.isGrounded && collidingWithWall && Input.GetButtonDown(JumpButton))
+            {
+                shouldWallJump = true;
+                canDoubleJump = true;
+            }
+            else if (Input.GetButtonDown(JumpButton) && canDoubleJump)
             {
                 shouldJump = true;
                 _animator.SetBool("canDoubleJump", true);
@@ -146,14 +147,12 @@ public class MovementController : MonoBehaviour
                 }
                 _animator.SetBool("playerJumping", true);
             }
-
             if (Input.GetButtonDown(JumpButton))
-                _animator.SetInteger("jumpCount", jumps+=1);
-
-
-
+            {
+                _animator.SetInteger("jumpCount", jumps += 1);
+            }
             if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < 0.5) && Input.GetButtonDown(JumpButton))
-                shouldFallThroughOneWay = true;         
+                shouldFallThroughOneWay = true;
         }
     }
 
@@ -188,10 +187,11 @@ public class MovementController : MonoBehaviour
             }
             if (_velocity.x > -runSpeed && _velocity.x < runSpeed && hasStartedRunning)
             {
-                
+
                 framesSpentCharging = 0;
                 hasStartedRunning = false;
             }
+
         }
         else if (!Input.GetButton((ChargeButton)))
         {
@@ -203,7 +203,6 @@ public class MovementController : MonoBehaviour
 
 
         //Move Left or Right
-
         if (shouldMoveRight)
         {
             normalizedHorizontalSpeed = 1;
@@ -228,14 +227,38 @@ public class MovementController : MonoBehaviour
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
                 currSpeed = walkSpeed;
                 transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
-
             }
-
             shouldMoveLeft = false;
         }
 
         //Jumping
-        if (shouldJump)
+        if (collidingWithWall)
+        {
+        }
+        {
+            Debug.Log(transform.rotation);
+        }
+        if (shouldWallJump)
+        {
+            shouldWallJump = false;
+            if ((_controller.collisionState.right && transform.localScale.x == 1) || (_controller.collisionState.left && transform.localScale.x == -1)) //player is facing wall
+            {
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            }
+
+            float horzVelocity = Mathf.Cos(wallJumpAngle * Mathf.Deg2Rad) * wallJumpIntensity;
+            float vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * wallJumpIntensity;
+            if (horzVelocity == -1)
+                horzVelocity = 0;
+            if (vertVelocity == -1)
+                vertVelocity = 0;
+            horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
+            vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
+
+            _velocity.x = horzVelocity * transform.localScale.x;
+            _velocity.y = vertVelocity;
+        }
+        else if (shouldJump)
         {
             _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
             if (isBeingKnockedBack)
@@ -264,17 +287,6 @@ public class MovementController : MonoBehaviour
         {
             _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * currSpeed, Time.deltaTime * smoothedMovementFactor);
         }
-
-        // for the wall
-        if (!_controller.isGrounded && (hittingLeftWall && _velocity.x < 0 && transform.localScale.x == -1 ||
-                                        hittingRightWall && _velocity.x > 0 && transform.localScale.x == 1)) {
-
-            _velocity.x = -_velocity.x * wallJumpSpeed;
-            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-            //hittingLeftWall = hittingRightWall = false;
-        }
-        else if (hittingLeftWall && _velocity.x < 0 || hittingRightWall && _velocity.x > 0)
-            _velocity.x = 0;
 
         // apply gravity before moving
         _velocity.y += gravity * Time.deltaTime;
