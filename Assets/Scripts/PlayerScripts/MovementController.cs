@@ -44,7 +44,9 @@ public class MovementController : MonoBehaviour
     public Animator _animator;
     private RaycastHit2D _lastControllerColliderHit;
     private Vector3 _velocity;
+    private SpriteRenderer _spriteRenderer;
     public Player _player;
+    private Color spriteColor;
 
     public float wallJumpAngle;
     public float wallJumpIntensity;
@@ -54,6 +56,9 @@ public class MovementController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _controller = GetComponent<CharacterController2D>();
         _player = GetComponent<Player>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+
+        spriteColor = _spriteRenderer.color;
 
         shouldJump = false;
         // listen to some events for illustration purposes
@@ -199,7 +204,6 @@ public class MovementController : MonoBehaviour
             framesSpentCharging = 0;
         }
 
-
         //Move Left or Right
         if (shouldMoveRight)
         {
@@ -212,7 +216,6 @@ public class MovementController : MonoBehaviour
                 transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
 
             }
-
             shouldMoveRight = false;
         }
         else if (shouldMoveLeft)
@@ -234,9 +237,6 @@ public class MovementController : MonoBehaviour
         if (collidingWithWall)
         {
         }
-        {
-            Debug.Log(transform.rotation);
-        }
         if (shouldWallJump)
         {
             shouldWallJump = false;
@@ -244,7 +244,6 @@ public class MovementController : MonoBehaviour
             {
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
-
             float horzVelocity = Mathf.Cos(wallJumpAngle * Mathf.Deg2Rad) * wallJumpIntensity;
             float vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * wallJumpIntensity;
             if (horzVelocity == -1)
@@ -302,9 +301,20 @@ public class MovementController : MonoBehaviour
 
     public void knockBack(Vector3 knockBackAmt)
     {
+        StartCoroutine(FlashPlayer(Color.red, _player.hitStunFrames));
         isBeingKnockedBack = true;
         _velocity = knockBackAmt;
     }
 
+    IEnumerator FlashPlayer(Color color, int frames)
+    {
+        for (int i = 0; i < frames/2; i++)
+        {
+            _spriteRenderer.color = color;
+            yield return new WaitForEndOfFrame();
+            _spriteRenderer.color = spriteColor;
+                yield return new WaitForEndOfFrame();
 
+        }
+    }
 }
