@@ -17,6 +17,7 @@ public class MovementController : MonoBehaviour
 
     private float framesSpentCharging;
     private float currSpeed;
+    private float preserveVelocityForWallJump;
     private int jumps = 0;
 
     public string JumpButton = "Jump_P1";
@@ -80,6 +81,10 @@ public class MovementController : MonoBehaviour
         if (col.transform.tag == "Wall")
         {
             collidingWithWall = true;
+            if (_velocity.x > preserveVelocityForWallJump)
+            {
+                preserveVelocityForWallJump = _velocity.x;
+            }
         }
     }
 
@@ -255,7 +260,7 @@ public class MovementController : MonoBehaviour
             horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
             vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
 
-            _velocity.x = horzVelocity * transform.localScale.x;
+            _velocity.x = horzVelocity * transform.localScale.x + -preserveVelocityForWallJump;
             _velocity.y = vertVelocity;
         }
         else if (shouldJump)
