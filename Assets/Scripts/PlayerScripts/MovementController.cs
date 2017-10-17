@@ -54,6 +54,11 @@ public class MovementController : MonoBehaviour
     public float wallJumpAngle;
     public float wallJumpIntensity;
 
+
+    public float bouncinessFactor = 1f;
+    bool bouncingOff = false;
+    Vector3 reflectedVelocity;
+
     void Awake()
     {
         _animator = GetComponent<Animator>();
@@ -85,6 +90,11 @@ public class MovementController : MonoBehaviour
             {
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
+
+            Vector2 n = hit.normal;
+            Vector2 v = _velocity;
+            reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
+            bouncingOff = true;
         }
         // bail out on plain old ground hits cause they arent very interesting
         if (hit.normal.y == 1f)
@@ -296,6 +306,11 @@ public class MovementController : MonoBehaviour
             _velocity.y *= 1f;
             _controller.ignoreOneWayPlatformsThisFrame = true;
             shouldFallThroughOneWay = false;
+        }
+
+        if (isBeingKnockedBack && bouncingOff) {
+            _velocity = reflectedVelocity * bouncinessFactor;
+            bouncingOff = false;
         }
 
         //only smooth velocity if not being knocked back
