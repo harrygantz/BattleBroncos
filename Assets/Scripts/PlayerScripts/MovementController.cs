@@ -46,7 +46,6 @@ public class MovementController : MonoBehaviour
     private Vector3 _velocity;
     public Player _player;
 
-    private bool collidingWithWall = false;
     public float wallJumpAngle;
     public float wallJumpIntensity;
 
@@ -67,6 +66,11 @@ public class MovementController : MonoBehaviour
 
     void onControllerCollider(RaycastHit2D hit)
     {
+        if (hit.transform.tag == "Wall")
+            if (_velocity.x > preserveVelocityForWallJump) {
+                    preserveVelocityForWallJump = _velocity.x;
+                }
+
         // bail out on plain old ground hits cause they arent very interesting
         if (hit.normal.y == 1f)
             return;
@@ -78,23 +82,11 @@ public class MovementController : MonoBehaviour
 
     void onTriggerEnterEvent(Collider2D col)
     {
-        if (col.transform.tag == "Wall")
-        {
-            collidingWithWall = true;
-            if (_velocity.x > preserveVelocityForWallJump)
-            {
-                preserveVelocityForWallJump = _velocity.x;
-            }
-        }
     }
 
 
     void onTriggerExitEvent(Collider2D col)
     {
-        if (col.transform.tag == "Wall")
-        {
-            collidingWithWall = false;
-        }
     }
 
     #endregion
@@ -136,6 +128,7 @@ public class MovementController : MonoBehaviour
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", false);
             }
+            bool collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
             if (!_controller.isGrounded && collidingWithWall && Input.GetButtonDown(JumpButton))
             {
                 shouldWallJump = true;
@@ -237,6 +230,7 @@ public class MovementController : MonoBehaviour
         }
 
         //Jumping
+        bool collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
         if (collidingWithWall)
         {
         }
