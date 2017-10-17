@@ -5,10 +5,7 @@ using Prime31;
 
 public class Player : MonoBehaviour {
 
-    private Level thisLevel;
-    public PlayerStats playerStats = new PlayerStats();
-    public CharacterController2D _controller;
-    public MovementController _movement;
+ 
     public int playerIndex;
     public bool preventInput;
     public bool invulerable;
@@ -18,6 +15,12 @@ public class Player : MonoBehaviour {
 
     private GameOver gameOverScreen;
     private StockManager stockManager;
+
+    private Level thisLevel;
+    public PlayerStats playerStats = new PlayerStats();
+    private CharacterController2D _controller;
+    private MovementController _movement;
+    private KeyboardMovementController _keyboardMove;
 
     void Start()
     {
@@ -32,10 +35,8 @@ public class Player : MonoBehaviour {
         thisLevel = GameObject.FindGameObjectsWithTag("Level")[0].GetComponent<Level>();
 
         _controller = GetComponent<CharacterController2D>();
-        _controller.onControllerCollidedEvent += onControllerCollider;
-        _controller.onTriggerEnterEvent += onTriggerEnterEvent;
-        _controller.onTriggerExitEvent += onTriggerExitEvent;
         _movement = GetComponent<MovementController>();
+        _keyboardMove = GetComponent<KeyboardMovementController>();
 
     }
 

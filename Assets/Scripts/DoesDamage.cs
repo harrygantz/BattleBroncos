@@ -24,7 +24,6 @@ public class DoesDamage : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
-
         Player otherPlayer = col.gameObject.GetComponentInParent<Player>();
         if (otherPlayer != null)
         {

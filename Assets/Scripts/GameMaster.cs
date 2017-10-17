@@ -27,6 +27,7 @@ public class GameMaster : MonoBehaviour {
         Transform spawnPoint = GameObject.FindGameObjectWithTag("Level").GetComponent<Level>().spawnPoints[player.playerIndex];
         player.gameObject.transform.position = spawnPoint.position;
         player.gameObject.SetActive(true);
+
         //Connect camera to new spawned players transform
         gm.playerDead = false;
         cm.players.Add(player.transform);
@@ -48,7 +49,6 @@ public class GameMaster : MonoBehaviour {
             cm.players.Remove(player.transform);
         } 
     }
-
 
     public static void UpdateHealth(string healthUiName, int playerHealth)
     {
