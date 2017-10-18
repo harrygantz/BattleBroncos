@@ -54,10 +54,13 @@ public class MovementController : MonoBehaviour
     public float wallJumpAngle;
     public float wallJumpIntensity;
 
-
     public float bouncinessFactor = 1f;
-    bool bouncingOff = false;
-    Vector3 reflectedVelocity;
+    private bool bouncingOff = false;
+    private Vector3 reflectedVelocity;
+
+    public float acceleration = 5f;
+    public float deceleration = 10f;
+    private float speed = 0;
 
     void Awake()
     {
@@ -148,21 +151,44 @@ public class MovementController : MonoBehaviour
             {
                 isBeingKnockedBack = false;
                 shouldMoveRight = true;
-                if (_controller.isGrounded)
+                if (_controller.isGrounded) 
+                {
                     _animator.SetBool("playerWalking", true);
+                    if ((_controller.collisionState.right || (_controller.collisionState.left && speed < 0)) 
+                        && transform.localScale.x > 0)
+                        speed = 0;
+                    else if (speed < runSpeed)
+                        speed += acceleration * Time.deltaTime;
+                }
             }
             else if (Input.GetAxis(HorizontalControl) < -0.5)
             {
                 isBeingKnockedBack = false;
                 shouldMoveLeft = true;
-                if (_controller.isGrounded)
+                if (_controller.isGrounded) 
+                {
                     _animator.SetBool("playerWalking", true);
+                    if ((_controller.collisionState.left || (_controller.collisionState.right && speed > 0))
+                        && transform.localScale.x < 0)
+                        speed = 0;
+                    else if (speed > -runSpeed)
+                        speed -= acceleration * Time.deltaTime;
+                }
             }
             else
             {
                 isBeingKnockedBack = false;
-                if (_controller.isGrounded)
+                if (_controller.isGrounded && Mathf.Abs(speed) <= 0f) {
                     _animator.SetBool("playerWalking", false);
+                }
+                if (_controller.isGrounded) {
+                    if (speed > deceleration * Time.deltaTime)
+                        speed -= deceleration * Time.deltaTime;
+                    else if (speed < -deceleration * Time.deltaTime)
+                        speed += deceleration * Time.deltaTime;
+                    else
+                        speed = 0f;
+                }
             }
             if (!_controller.isGrounded && collidingWithWall && Input.GetButtonDown(JumpButton))
             {
@@ -241,7 +267,7 @@ public class MovementController : MonoBehaviour
         //Move Left or Right
         if (shouldMoveRight)
         {
-            normalizedHorizontalSpeed = 1;
+            //normalizedHorizontalSpeed = 1;
             if (transform.localScale.x < 0f && _controller.isGrounded)
             {
                 framesSpentCharging = 0;
@@ -255,7 +281,7 @@ public class MovementController : MonoBehaviour
         else if (shouldMoveLeft)
         {
             shouldMoveLeft = true;
-            normalizedHorizontalSpeed = -1;
+            //normalizedHorizontalSpeed = -1;
             if (transform.localScale.x > 0f && _controller.isGrounded)
             {
                 framesSpentCharging = 0;
@@ -290,6 +316,7 @@ public class MovementController : MonoBehaviour
             _velocity.x = horzVelocity * transform.localScale.x;
             _velocity.y = vertVelocity;
             _player.stopInput(2); //Time to switch direction
+            speed = Mathf.Abs(speed) * _velocity.x < 0 ? -1 : 1;
         }
         else if (shouldJump)
         {
@@ -317,13 +344,16 @@ public class MovementController : MonoBehaviour
         if (isBeingKnockedBack)
         {
             if (_controller.isGrounded)
-                normalizedHorizontalSpeed = 0;
+                //normalizedHorizontalSpeed = 0;
+                speed = 0;
             else
-                normalizedHorizontalSpeed = _velocity.x < 0 ? -1 : 1;
+                //normalizedHorizontalSpeed = _velocity.x < 0 ? -1 : 1;
+                speed = Mathf.Abs(speed) * _velocity.x < 0 ? -1 : 1;
         }
         else
         {
-            _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * currSpeed, Time.deltaTime * smoothedMovementFactor);
+            speed = Mathf.Clamp(speed, -currSpeed, currSpeed);
+            _velocity.x = Mathf.Lerp(_velocity.x, speed, Time.deltaTime * smoothedMovementFactor);
         }
 
         // apply gravity before moving
