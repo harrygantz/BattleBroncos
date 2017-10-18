@@ -23,7 +23,7 @@ public class MovementController : MonoBehaviour
     public string JumpButton = "Jump_P1";
     public string HorizontalControl = "Horizontal_P1";
     public string VerticalControl = "Vertical_P1";
-    public string ChargeButton;
+    public string ChargeAxis;
     //FixedUpdate Update bools
     private bool shouldJump;
     private bool shouldWallJump;
@@ -80,7 +80,6 @@ public class MovementController : MonoBehaviour
 
     void onControllerCollider(RaycastHit2D hit)
     {
-        if (hit.transform.tag == "Floor")
         if (hit.transform.tag == "Wall")
         {
             collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
@@ -96,10 +95,9 @@ public class MovementController : MonoBehaviour
 
         }
         // bail out on plain old ground hits cause they arent very interesting
-        
+
         if (isBeingKnockedBack)
         {
-            Debug.Log(hit.normal);
             Vector2 n = hit.normal;
             Vector2 v = _velocity;
             reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
@@ -131,8 +129,7 @@ public class MovementController : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(transform.gameObject);
-        Debug.Log(isBeingKnockedBack);
+        Debug.Log(Input.GetAxis(ChargeAxis));
         if (!_player.preventInput)
         {
             if (_controller.isGrounded)
@@ -206,7 +203,7 @@ public class MovementController : MonoBehaviour
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
 
         //Walk-Run login
-        if (Input.GetButton(ChargeButton))
+        if (Input.GetAxis(ChargeAxis) < -0.5)
         {
             currSpeed = runSpeed;
             shouldRun = true;
@@ -237,7 +234,7 @@ public class MovementController : MonoBehaviour
             //    hasStartedRunning = false;
             //}
         }
-        else if (!Input.GetButton((ChargeButton)))
+        else if (!(Input.GetAxis(ChargeAxis) < -0.5))
         {
             currSpeed = walkSpeed;
             transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
@@ -318,7 +315,8 @@ public class MovementController : MonoBehaviour
             shouldFallThroughOneWay = false;
         }
 
-        if (isBeingKnockedBack && bouncingOff) {
+        if (isBeingKnockedBack && bouncingOff)
+        {
             _velocity = reflectedVelocity * bouncinessFactor;
             bouncingOff = false;
         }
