@@ -291,6 +291,7 @@ namespace Prime31
             if (onControllerCollidedEvent != null)
             {
                 for (var i = 0; i < _raycastHitsThisFrame.Count; i++)
+                    //Debug.Log(_raycastHitsThisFrame);
                     onControllerCollidedEvent(_raycastHitsThisFrame[i]);
             }
 

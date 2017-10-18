@@ -5,7 +5,6 @@ using Prime31;
 
 public class Player : MonoBehaviour {
 
- 
     public int playerIndex;
     public bool preventInput;
     public bool invulerable;

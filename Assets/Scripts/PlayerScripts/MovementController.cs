@@ -40,13 +40,14 @@ public class MovementController : MonoBehaviour
     private bool preventMovement;
     private float rotateAngle;
     private bool collidingWithWall;
+
+    public Vector3 _velocity;
     [HideInInspector]
 
     private float normalizedHorizontalSpeed = 0;
     private CharacterController2D _controller;
     private Animator _animator;
     private RaycastHit2D _lastControllerColliderHit;
-    private Vector3 _velocity;
     private SpriteRenderer _spriteRenderer;
     private Player _player;
     private Color spriteColor;
@@ -54,7 +55,6 @@ public class MovementController : MonoBehaviour
 
     public float wallJumpAngle;
     public float wallJumpIntensity;
-
 
     public float bouncinessFactor = 1f;
     bool bouncingOff = false;
@@ -80,6 +80,7 @@ public class MovementController : MonoBehaviour
 
     void onControllerCollider(RaycastHit2D hit)
     {
+        if (hit.transform.tag == "Floor")
         if (hit.transform.tag == "Wall")
         {
             collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
@@ -92,16 +93,22 @@ public class MovementController : MonoBehaviour
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
 
-            if (isBeingKnockedBack)
-            {
-                Vector2 n = hit.normal;
-                Vector2 v = _velocity;
-                reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
-                bouncingOff = true;
-            }
 
         }
         // bail out on plain old ground hits cause they arent very interesting
+        
+        if (isBeingKnockedBack)
+        {
+            Debug.Log(hit.normal);
+            Vector2 n = hit.normal;
+            Vector2 v = _velocity;
+            reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
+            bouncingOff = true;
+        }
+        else
+        if (_controller.collisionState.becameGroundedThisFrame)
+        {
+        }
         if (hit.normal.y == 1f)
             return;
 
@@ -124,6 +131,8 @@ public class MovementController : MonoBehaviour
 
     void Update()
     {
+        Debug.Log(transform.gameObject);
+        Debug.Log(isBeingKnockedBack);
         if (!_player.preventInput)
         {
             if (_controller.isGrounded)
@@ -298,7 +307,7 @@ public class MovementController : MonoBehaviour
             }
             shouldJump = false;
         }
-        if (shouldFastFall && _controller.velocity.y < 4)
+        if (shouldFastFall && _controller.velocity.y < 6)
         {
             _velocity.y = -jumpHeight * 8f;
         }
@@ -362,4 +371,5 @@ public class MovementController : MonoBehaviour
     {
         return ((_controller.collisionState.right && Input.GetAxis(HorizontalControl) > 0.5) || (_controller.collisionState.left && Input.GetAxis(HorizontalControl) < -0.5));
     }
+
 }
