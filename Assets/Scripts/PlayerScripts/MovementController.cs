@@ -33,6 +33,7 @@ public class MovementController : MonoBehaviour
     private bool shouldMoveRight;
     private bool shouldMoveLeft;
     private bool shouldFallThroughOneWay;
+    private bool shouldFastFall;
     private bool shouldResetVelocityX;
     private bool shouldResetVelocityY;
     private bool isBeingKnockedBack;
@@ -81,7 +82,7 @@ public class MovementController : MonoBehaviour
     {
         if (hit.transform.tag == "Wall")
         {
-
+            collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
             if (_velocity.x > preserveVelocityForWallJump)
             {
                 preserveVelocityForWallJump = _velocity.x;
@@ -110,16 +111,6 @@ public class MovementController : MonoBehaviour
 
     void onTriggerEnterEvent(Collider2D col)
     {
-        if (col.transform.tag == "Wall")
-        {
-            collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
-            if (collidingWithWall)
-            {
-
-                //rotateangle = _controller.collisionstate.right ? 90f : -90f;
-                //transform.rotate(vector3.forward * rotateangle);
-            }
-        }
     }
 
     void onTriggerExitEvent(Collider2D col)
@@ -143,10 +134,12 @@ public class MovementController : MonoBehaviour
                 _animator.SetBool("playerJumping", false);
                 _animator.SetBool("isGrounded", true);
                 _animator.SetInteger("jumpCount", jumps = 0);
+                shouldFastFall = false;
             }
             else
             {
                 _animator.SetBool("isGrounded", false);
+                shouldFastFall = (Input.GetAxis(VerticalControl) > 0.5);
             }
             if (Input.GetAxis(HorizontalControl) > 0.5)
             {
@@ -171,9 +164,9 @@ public class MovementController : MonoBehaviour
             if (!_controller.isGrounded && collidingWithWall && Input.GetButtonDown(JumpButton))
             {
                 shouldWallJump = true;
+                canDoubleJump = true;
                 _animator.SetBool("canDoubleJump", true);
                 _animator.SetBool("playerJumping", true);
-                canDoubleJump = true;
             }
             else if (Input.GetButtonDown(JumpButton) && canDoubleJump)
             {
@@ -190,7 +183,8 @@ public class MovementController : MonoBehaviour
             {
                 _animator.SetInteger("jumpCount", jumps += 1);
             }
-            if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < 0.5) && Input.GetButtonDown(JumpButton))
+
+            if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < -0.5) && Input.GetButtonDown(JumpButton))
                 shouldFallThroughOneWay = true;
         }
     }
@@ -203,7 +197,7 @@ public class MovementController : MonoBehaviour
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
 
         //Walk-Run login
-        if (_controller.isGrounded && Input.GetButton(ChargeButton))
+        if (Input.GetButton(ChargeButton))
         {
             currSpeed = runSpeed;
             shouldRun = true;
@@ -271,7 +265,6 @@ public class MovementController : MonoBehaviour
         }
 
         //Jumping
-        bool collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
         if (holdingTowardsWall() && !_controller.isGrounded && _velocity.y < 1)
         {
             _velocity.y = -1;
@@ -305,6 +298,10 @@ public class MovementController : MonoBehaviour
             }
             shouldJump = false;
         }
+        if (shouldFastFall && _controller.velocity.y < 4)
+        {
+            _velocity.y = -jumpHeight * 8f;
+        }
         if (shouldFallThroughOneWay)
         {
             _velocity.y *= 1f;
@@ -313,7 +310,6 @@ public class MovementController : MonoBehaviour
         }
 
         if (isBeingKnockedBack && bouncingOff) {
-            Debug.Log(reflectedVelocity);
             _velocity = reflectedVelocity * bouncinessFactor;
             bouncingOff = false;
         }

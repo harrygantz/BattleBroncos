@@ -52,8 +52,6 @@ public class CameraManager : MonoBehaviour {
         midPoint += players[0].position;
         if (midPoint.x < -xLock || midPoint.x > xLock)
             midPoint.x = midPoint.x < -xLock ? -xLock : xLock;
-        if (midPoint.y < -yLock || midPoint.y > yLock)
-            midPoint.y = midPoint.y < -yLock ? -yLock : yLock;
 
         switch (cType)
         {
