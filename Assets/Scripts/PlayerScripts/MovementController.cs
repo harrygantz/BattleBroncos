@@ -8,43 +8,55 @@ public class MovementController : MonoBehaviour
     // movement config
     public float gravity = -25f;
     public float walkSpeed;
-    public float runSpeed;
+    public float chargeAcceleration;
+    public float decceleration;
+    public float airAcceleration;
+    public float maxSpeed;
     public float airSpeed;
-    public float mahCharginSpeed = 8f;
     public float groundDamping = 20f; // how fast do we change direction? higher means faster
     public float inAirDamping = 5f;
     public float jumpHeight = 3f;
-
-    private float framesSpentCharging;
-    private float currSpeed;
-    private float preserveVelocityForWallJump;
-    private int jumps = 0;
+    public float wallJumpAngle;
+    public float baseWallJumpSpeed;
+    public float bouncinessFactor = 1f;
 
     public string JumpButton = "Jump_P1";
     public string HorizontalControl = "Horizontal_P1";
     public string VerticalControl = "Vertical_P1";
     public string ChargeAxis;
-    //FixedUpdate Update bools
-    private bool shouldJump;
-    private bool shouldWallJump;
-    private bool hasStartedRunning;
-    private bool shouldRun;
-    private bool canDoubleJump;
-    private bool shouldMoveRight;
-    private bool shouldMoveLeft;
-    private bool shouldFallThroughOneWay;
-    private bool shouldFastFall;
-    private bool shouldResetVelocityX;
-    private bool shouldResetVelocityY;
-    private bool isBeingKnockedBack;
-    private bool preventMovement;
-    private float rotateAngle;
-    private bool collidingWithWall;
+    public string DebugButton;
 
     public Vector3 _velocity;
     [HideInInspector]
 
+    private bool isBeingKnockedBack;
+    private bool isBouncingOff;
+    private bool shouldDeccellerate;
+    private bool shouldJump;
+    private bool shouldWallJump;
+    private bool shouldCharge;
+    private bool shouldMoveRight;
+    private bool shouldMoveLeft;
+    private bool shouldFallThroughOneWay;
+    private bool shouldFastFall;
+    private bool shouldSlideDownWall;
+    private bool shouldResetXVelocity;
+    private bool shouldApplyGravity;
+    private bool shouldResetYVelocity;
+    private bool hasStartedRunning;
+    private bool canDoubleJump;
+    private bool preventMovement;
+    private bool collidingWithWall;
+    private bool preventLeftRight;
+    private bool ifDidLerp;
+
+    private int jumps = 0;
+
+    private float rotateAngle;
     private float normalizedHorizontalSpeed = 0;
+    private float currentSpeed;
+    private float holdXVelocityForWallJump;
+
     private CharacterController2D _controller;
     private Animator _animator;
     private RaycastHit2D _lastControllerColliderHit;
@@ -53,12 +65,10 @@ public class MovementController : MonoBehaviour
     private Color spriteColor;
     private Transform playerTransform;
 
-    public float wallJumpAngle;
-    public float wallJumpIntensity;
+    private Vector3 velocityLastFrame;
+    private Vector3 reflectedVelocity;
 
-    public float bouncinessFactor = 1f;
-    bool bouncingOff = false;
-    Vector3 reflectedVelocity;
+    private List<float> list = new List<float>();
 
     void Awake()
     {
@@ -74,34 +84,20 @@ public class MovementController : MonoBehaviour
         _controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
+        _controller.onTriggerStayEvent += onTriggerStayEvent;
     }
 
     #region Event Listeners
 
     void onControllerCollider(RaycastHit2D hit)
     {
-        if (hit.transform.tag == "Wall")
-        {
-            collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
-            if (_velocity.x > preserveVelocityForWallJump)
-            {
-                preserveVelocityForWallJump = _velocity.x;
-            }
-            if (((_controller.collisionState.right && transform.localScale.x == 1) || (_controller.collisionState.left && transform.localScale.x == -1)) && !_controller.isGrounded) //player is facing wall
-            {
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-            }
-
-
-        }
         // bail out on plain old ground hits cause they arent very interesting
-
         if (isBeingKnockedBack)
         {
             Vector2 n = hit.normal;
             Vector2 v = _velocity;
             reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
-            bouncingOff = true;
+            isBouncingOff = true;
         }
         else
         if (_controller.collisionState.becameGroundedThisFrame)
@@ -116,6 +112,20 @@ public class MovementController : MonoBehaviour
 
     void onTriggerEnterEvent(Collider2D col)
     {
+        if (col.transform.tag == "Wall")
+        {
+            collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
+            if (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump))
+            {
+                holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
+                Debug.Log("velocity saved: " + holdXVelocityForWallJump);
+            }
+            if (((_controller.collisionState.right && transform.localScale.x == 1) || (_controller.collisionState.left && transform.localScale.x == -1)) && !_controller.isGrounded) //player is facing wall
+            {
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            }
+        }
+
     }
 
     void onTriggerExitEvent(Collider2D col)
@@ -125,38 +135,58 @@ public class MovementController : MonoBehaviour
             collidingWithWall = false;
         }
     }
+
+    void onTriggerStayEvent(Collider2D col)
+    {
+        if (col.transform.tag == "Wall")
+        {
+            collidingWithWall = true;
+        }
+    }
     #endregion
 
     void Update()
     {
-        Debug.Log(Input.GetAxis(ChargeAxis));
-        if (!_player.preventInput)
+        //Reset Vars for isGrounded
+        if (_controller.isGrounded)
         {
-            if (_controller.isGrounded)
+            canDoubleJump = true;
+            shouldFastFall = false;
+            _animator.SetBool("canDoubleJump", true);
+            _animator.SetBool("playerJumping", false);
+            _animator.SetBool("isGrounded", true);
+            _animator.SetInteger("jumpCount", jumps = 0);
+        }
+        else
+        {
+            _animator.SetBool("isGrounded", false);
+        }
+
+        //Save Velocity for wall jump
+        if (collidingWithWall && (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump)))
+        {
+            holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
+        }
+
+        #region Input
+        if (!_player.preventInput) 
+        {
+            //if (collidingWithWall)
+            //{
+            //    freezeLeftRight(5);
+            //}
+
+            //Left Stick
+            if (Input.GetAxis(HorizontalControl) > 0.5 && !preventLeftRight) //right
             {
-                shouldResetVelocityY = true;
-                canDoubleJump = true;
-                _animator.SetBool("canDoubleJump", true);
-                _animator.SetBool("playerJumping", false);
-                _animator.SetBool("isGrounded", true);
-                _animator.SetInteger("jumpCount", jumps = 0);
-                shouldFastFall = false;
-            }
-            else
-            {
-                _animator.SetBool("isGrounded", false);
-                shouldFastFall = (Input.GetAxis(VerticalControl) > 0.5);
-            }
-            if (Input.GetAxis(HorizontalControl) > 0.5)
-            {
-                isBeingKnockedBack = false;
+                isBeingKnockedBack = false; //If the player gets out of hitstun while in air they should continue moving until they input
                 shouldMoveRight = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
-            else if (Input.GetAxis(HorizontalControl) < -0.5)
+            else if (Input.GetAxis(HorizontalControl) < -0.5 && !preventLeftRight) //left
             {
-                isBeingKnockedBack = false;
+                isBeingKnockedBack = false; //If the player gets out of hitstun while in air they should continue moving until they input
                 shouldMoveLeft = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
@@ -167,14 +197,51 @@ public class MovementController : MonoBehaviour
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", false);
             }
-            if (!_controller.isGrounded && collidingWithWall && Input.GetButtonDown(JumpButton))
+
+            if (holdingTowardsWall() && !_controller.isGrounded)
+            {
+                shouldSlideDownWall = true;
+                _animator.SetBool("playerJumping", false);
+                _animator.SetBool("playerWalking", false);
+            }
+            else
+            {
+                shouldSlideDownWall = false;
+            }
+
+            if (Input.GetAxis(VerticalControl) > 0.5) //down
+            {
+                if (_controller.isGrounded)
+                {
+                    shouldDeccellerate = true;
+                }
+                else
+                {
+                    shouldFastFall = true;
+                }
+            }
+
+            //Charge
+            if (Input.GetAxis(ChargeAxis) < -0.5)
+            {
+                shouldCharge = true;
+                transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(true);
+            } else
+            {
+                shouldCharge = false;
+                holdXVelocityForWallJump = 0f;
+                //transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
+            }
+
+            //Jump
+            if (!_controller.isGrounded && collidingWithWall && Input.GetButtonDown(JumpButton)) //wall jump
             {
                 shouldWallJump = true;
                 canDoubleJump = true;
                 _animator.SetBool("canDoubleJump", true);
                 _animator.SetBool("playerJumping", true);
             }
-            else if (Input.GetButtonDown(JumpButton) && canDoubleJump)
+            else if (Input.GetButtonDown(JumpButton) && canDoubleJump) //regular jump
             {
                 shouldJump = true;
                 _animator.SetBool("canDoubleJump", true);
@@ -190,111 +257,103 @@ public class MovementController : MonoBehaviour
                 _animator.SetInteger("jumpCount", jumps += 1);
             }
 
+            //Charge
+            if (Input.GetButtonDown(DebugButton))
+            {
+                //Debug shit in here, this code doesn't matter
+                list.Sort();
+                foreach (float f in list)
+                {
+                    Debug.Log(f);
+                }
+            }
+
             if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < -0.5) && Input.GetButtonDown(JumpButton))
                 shouldFallThroughOneWay = true;
         }
+        #endregion
     }
 
     void FixedUpdate()
     {
+        float gravityToUse = gravity;
+        float speedToUse;
+        float accelerationToUse;
 
-        // apply horizontal speed smoothing it. dont really do this with Lerp. Use SmoothDamp or something that provides more control
         normalizedHorizontalSpeed = 0;
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; // how fast do we change direction?
 
-        //Walk-Run login
-        if (Input.GetAxis(ChargeAxis) < -0.5)
-        {
-            currSpeed = runSpeed;
-            shouldRun = true;
-            transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(true);
-            //currSpeed = mahCharginSpeed;
-            //framesSpentCharging += 1;
-            //if (framesSpentCharging > 30)
-            //{
-            //    shouldRun = true;
-            //    currSpeed = runSpeed;
-            //    transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(true);
-            //}
-            //if (framesSpentCharging == 0)
-            //{
-            //    shouldRun = false;
-            //    currSpeed = runSpeed;
-            //    transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
-            //}
-            //if (_velocity.x < -runSpeed || _velocity.x > runSpeed)
-            //{
-            //    hasStartedRunning = true;
-
-            //}
-            //if (_velocity.x > -runSpeed && _velocity.x < runSpeed && hasStartedRunning)
-            //{
-
-            //    framesSpentCharging = 0;
-            //    hasStartedRunning = false;
-            //}
-        }
-        else if (!(Input.GetAxis(ChargeAxis) < -0.5))
-        {
-            currSpeed = walkSpeed;
-            transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
-            shouldRun = false;
-            framesSpentCharging = 0;
-        }
-
         //Move Left or Right
+        if(_controller.isGrounded) {
+            speedToUse = walkSpeed;
+            accelerationToUse = chargeAcceleration;
+        }
+        else
+        {
+            speedToUse = airSpeed;
+            accelerationToUse = airAcceleration;
+        }
+         
         if (shouldMoveRight)
         {
             normalizedHorizontalSpeed = 1;
-            if (transform.localScale.x < 0f && _controller.isGrounded)
+            if (transform.localScale.x < 0f && (_controller.isGrounded || !shouldCharge))
             {
-                framesSpentCharging = 0;
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-                currSpeed = walkSpeed;
-                transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
-
+            }
+            if (shouldCharge && (_velocity.x += accelerationToUse * Time.deltaTime) > walkSpeed)
+            {
+                currentSpeed = _velocity.x += accelerationToUse * Time.deltaTime;
+            }
+            else
+            {
+                currentSpeed = speedToUse;
             }
             shouldMoveRight = false;
         }
         else if (shouldMoveLeft)
         {
-            shouldMoveLeft = true;
             normalizedHorizontalSpeed = -1;
-            if (transform.localScale.x > 0f && _controller.isGrounded)
+            if (transform.localScale.x > 0 && (_controller.isGrounded || !shouldCharge) )
             {
-                framesSpentCharging = 0;
                 transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
-                currSpeed = walkSpeed;
-                transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
+            }
+            if (shouldCharge && (_velocity.x -= accelerationToUse * Time.deltaTime) < -walkSpeed)
+            {
+                currentSpeed = _velocity.x -= accelerationToUse * Time.deltaTime;
+            }
+            else
+            {
+                currentSpeed = -speedToUse;
             }
             shouldMoveLeft = false;
         }
+        else
+        {
+            if (_controller.isGrounded)
+            {
+                if (currentSpeed > decceleration * Time.deltaTime)
+                    currentSpeed -= decceleration * Time.deltaTime;
+                else if (currentSpeed < -decceleration * Time.deltaTime)
+                    currentSpeed += decceleration * Time.deltaTime;
+            }
+            else
+            {
+               //currentSpeed = shouldCharge ? (_velocity.x += transform.localScale.x * chargeAcceleration * Time.deltaTime) : -walkSpeed;
+            }
+        }
+
+        //Falling
+        if (shouldFallThroughOneWay)
+        {
+            _velocity.y *= 1f;
+            _controller.ignoreOneWayPlatformsThisFrame = true;
+            shouldFallThroughOneWay = false;
+        }
 
         //Jumping
-        if (holdingTowardsWall() && !_controller.isGrounded && _velocity.y < 1)
-        {
-            _velocity.y = -1;
-            _animator.SetBool("playerJumping", false);
-            _animator.SetBool("playerWalking", false);
-        }
-        if (shouldWallJump)
-        {
-            shouldWallJump = false;
-
-            float horzVelocity = Mathf.Cos(wallJumpAngle * Mathf.Deg2Rad) * wallJumpIntensity;
-            float vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * wallJumpIntensity;
-            if (horzVelocity == -1)
-                horzVelocity = 0;
-            if (vertVelocity == -1)
-                vertVelocity = 0;
-            horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
-            vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
-
-            _velocity.x = horzVelocity * transform.localScale.x;
-            _velocity.y = vertVelocity;
-            _player.stopInput(2); //Time to switch direction
-        }
-        else if (shouldJump)
+        bool didWallJump = false;
+        if (shouldJump)
         {
             _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
             if (isBeingKnockedBack)
@@ -304,42 +363,90 @@ public class MovementController : MonoBehaviour
             }
             shouldJump = false;
         }
-        if (shouldFastFall && _controller.velocity.y < 6)
+        else if (shouldWallJump)
         {
-            _velocity.y = -jumpHeight * 8f;
+            float horzVelocity = baseWallJumpSpeed;
+            float vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * baseWallJumpSpeed;
+            Debug.Log("Velocity used: " + holdXVelocityForWallJump);
+            if (holdingTowardsWall())
+            {
+                if (shouldCharge)//just slide up wall
+                {
+                    horzVelocity = 0f;
+                }
+                vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * baseWallJumpSpeed;
+
+            }
+            else
+            {
+                if (shouldCharge && holdXVelocityForWallJump > baseWallJumpSpeed)
+                {
+                    horzVelocity = holdXVelocityForWallJump;
+                    vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * holdXVelocityForWallJump;
+                }
+            }
+            if (horzVelocity == -1)
+                horzVelocity = 0;
+            if (vertVelocity == -1)
+                vertVelocity = 0;
+
+            horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
+            vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
+            currentSpeed = horzVelocity * transform.localScale.x;
+            Debug.Log(transform.localScale.x);
+            _velocity.y = vertVelocity * 1.5f;
+
+            freezeLeftRight(5);
+            holdXVelocityForWallJump = 0;
+            didWallJump = true;
+            shouldApplyGravity = false;
+            shouldWallJump = false;
         }
-        if (shouldFallThroughOneWay)
+        if (shouldSlideDownWall && _velocity.y < 6f)
         {
-            _velocity.y *= 1f;
-            _controller.ignoreOneWayPlatformsThisFrame = true;
-            shouldFallThroughOneWay = false;
+            _velocity.y = -1;
+        }
+        if (shouldFastFall)
+        {
+            gravityToUse = 6f * gravity;
+            shouldFastFall = false;
         }
 
-        if (isBeingKnockedBack && bouncingOff)
-        {
-            _velocity = reflectedVelocity * bouncinessFactor;
-            bouncingOff = false;
-        }
-
-        //only smooth velocity if not being knocked back
-        if (isBeingKnockedBack)
+        //Knockback
+        if (isBeingKnockedBack) //smooth only if not being knocked back
         {
             if (_controller.isGrounded)
                 normalizedHorizontalSpeed = 0;
             else
                 normalizedHorizontalSpeed = _velocity.x < 0 ? -1 : 1;
+
+            if (isBouncingOff && _player.preventInput)
+            {
+                _velocity = reflectedVelocity * bouncinessFactor;
+                isBouncingOff = false;
+            }
         }
         else
         {
-            _velocity.x = Mathf.Lerp(_velocity.x, normalizedHorizontalSpeed * currSpeed, Time.deltaTime * smoothedMovementFactor);
+            currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed, maxSpeed);
+            if (didWallJump)
+            {
+                _velocity.x = currentSpeed;
+            }
+            else
+            {
+                _velocity.x = Mathf.Lerp(_velocity.x, currentSpeed, Time.deltaTime * smoothedMovementFactor);
+            }
         }
 
-        // apply gravity before moving
-        _velocity.y += gravity * Time.deltaTime;
-        _controller.move(_velocity * Time.deltaTime);
+        if (shouldApplyGravity)
+            _velocity.y += gravityToUse * Time.deltaTime;
 
-        // grab our current _velocity to use as a base for all calculations
+        _controller.move(_velocity * Time.deltaTime);
         _velocity = _controller.velocity;
+        velocityLastFrame = _velocity;
+        shouldApplyGravity = true;
+        didWallJump = false;
     }
 
     public void resetVelocity()
@@ -349,10 +456,19 @@ public class MovementController : MonoBehaviour
 
     public void knockBack(Vector3 knockBackAmt)
     {
-        StartCoroutine(FlashPlayer(Color.red, _player.hitStunFrames));
+        int normalX = knockBackAmt.x < 0 ? -1 : 1;
+        int normalY = knockBackAmt.y < 0 ? -1 : 1;
+        knockBackAmt = new Vector3(
+            Mathf.Sqrt(Mathf.Abs(knockBackAmt.x) * 10) * normalX,
+            Mathf.Sqrt(Mathf.Abs(knockBackAmt.y) * 10) * normalY,
+            0
+        );
+        list.Add(knockBackAmt.y);
         isBeingKnockedBack = true;
         _velocity = knockBackAmt;
+        StartCoroutine(FlashPlayer(Color.red, _player.hitStunFrames));
     }
+
 
     IEnumerator FlashPlayer(Color color, int frames)
     {
@@ -365,9 +481,26 @@ public class MovementController : MonoBehaviour
         }
     }
 
+    IEnumerator freezeLeftRight(int time)
+    {
+        preventLeftRight = true;
+        for (int i = 0; i < time; i++)
+            yield return new WaitForEndOfFrame();
+        preventLeftRight = false;
+    }
+
     private bool holdingTowardsWall()
     {
         return ((_controller.collisionState.right && Input.GetAxis(HorizontalControl) > 0.5) || (_controller.collisionState.left && Input.GetAxis(HorizontalControl) < -0.5));
+    }
+
+    private bool movingFowards()
+    {
+        //fowards is relative to the direction the player is facing
+        return (
+            (transform.localScale.x > 0 && _velocity.x > 0) ||
+            (transform.localScale.x < 0 && _velocity.x < 0)
+        );
     }
 
 }

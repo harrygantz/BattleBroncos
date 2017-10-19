@@ -298,7 +298,6 @@ namespace Prime31
             ignoreOneWayPlatformsThisFrame = false;
         }
 
-
         /// <summary>
         /// moves directly down until grounded
         /// </summary>
