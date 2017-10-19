@@ -182,7 +182,9 @@ public class MovementController : MonoBehaviour
                     _animator.SetBool("playerWalking", false);
                 }
                 if (_controller.isGrounded) {
-                    if (speed > deceleration * Time.deltaTime)
+                    if (collidingWithWall)
+                        speed = 0f;
+                    else if (speed > deceleration * Time.deltaTime)
                         speed -= deceleration * Time.deltaTime;
                     else if (speed < -deceleration * Time.deltaTime)
                         speed += deceleration * Time.deltaTime;
@@ -316,7 +318,8 @@ public class MovementController : MonoBehaviour
             _velocity.x = horzVelocity * transform.localScale.x;
             _velocity.y = vertVelocity;
             _player.stopInput(2); //Time to switch direction
-            speed = Mathf.Abs(speed) * _velocity.x < 0 ? -1 : 1;
+
+            speed = Mathf.Abs(speed) * (_velocity.x < 0 ? -1 : 1);
         }
         else if (shouldJump)
         {
@@ -348,7 +351,7 @@ public class MovementController : MonoBehaviour
                 speed = 0;
             else
                 //normalizedHorizontalSpeed = _velocity.x < 0 ? -1 : 1;
-                speed = Mathf.Abs(speed) * _velocity.x < 0 ? -1 : 1;
+                speed = Mathf.Abs(speed) * (_velocity.x < 0 ? -1 : 1);
         }
         else
         {
