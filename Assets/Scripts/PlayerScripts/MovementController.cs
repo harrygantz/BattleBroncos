@@ -55,7 +55,6 @@ public class MovementController : MonoBehaviour
     public float wallJumpIntensity;
 
     public float bouncinessFactor = 1f;
-    private bool bouncingOff = false;
     private Vector3 reflectedVelocity;
 
     public float acceleration = 5f;
@@ -97,8 +96,8 @@ public class MovementController : MonoBehaviour
             Vector2 n = hit.normal;
             Vector2 v = _velocity;
             reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
-            bouncingOff = true;
         }
+        
         // bail out on plain old ground hits cause they arent very interesting
         if (hit.normal.y == 1f)
             return;
@@ -338,9 +337,8 @@ public class MovementController : MonoBehaviour
             shouldFallThroughOneWay = false;
         }
 
-        if (isBeingKnockedBack && bouncingOff) {
+        if (isBeingKnockedBack && collidingWithWall) {
             _velocity = reflectedVelocity * bouncinessFactor;
-            bouncingOff = false;
         }
 
         //only smooth velocity if not being knocked back
