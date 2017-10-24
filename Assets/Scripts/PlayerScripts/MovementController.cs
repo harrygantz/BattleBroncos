@@ -381,8 +381,8 @@ public class MovementController : MonoBehaviour
             {
                 if (shouldCharge && holdXVelocityForWallJump > baseWallJumpSpeed)
                 {
-                    horzVelocity = holdXVelocityForWallJump;
-                    vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * holdXVelocityForWallJump;
+                    horzVelocity = holdXVelocityForWallJump * 1.3f;
+                    vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * holdXVelocityForWallJump * 1.3f;
                 }
             }
             if (horzVelocity == -1)
@@ -393,7 +393,6 @@ public class MovementController : MonoBehaviour
             horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
             vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
             currentSpeed = horzVelocity * transform.localScale.x;
-            Debug.Log(transform.localScale.x);
             _velocity.y = vertVelocity * 1.5f;
 
             freezeLeftRight(5);
@@ -408,7 +407,8 @@ public class MovementController : MonoBehaviour
         }
         if (shouldFastFall)
         {
-            gravityToUse = 6f * gravity;
+            //gravityToUse = 6f * gravity;
+            _velocity.y = 6f * -jumpHeight;
             shouldFastFall = false;
         }
 
@@ -431,6 +431,7 @@ public class MovementController : MonoBehaviour
             currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed, maxSpeed);
             if (didWallJump)
             {
+                Debug.Log(currentSpeed);
                 _velocity.x = currentSpeed;
             }
             else
