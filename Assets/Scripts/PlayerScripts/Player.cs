@@ -6,20 +6,30 @@ using Prime31;
 public class Player : MonoBehaviour {
 
     public int playerIndex;
-    public bool preventInput;
-    public bool invulerable;
-    public string healthUIName;
     public int invulnFramesOnHit;
     public int hitStunFrames;
 
+    public bool useKeyboard;
+    public bool invulerable;
+
+    public string healthUIName;
+
+    public PlayerStats playerStats = new PlayerStats();
+
+    public bool preventInput;
+    public bool preventTurnaround;
+    [HideInInspector]
+    //Private
+
+    private Color spriteColor;
+
     private GameOver gameOverScreen;
     private StockManager stockManager;
-
     private Level thisLevel;
-    public PlayerStats playerStats = new PlayerStats();
     private CharacterController2D _controller;
     private MovementController _movement;
     private KeyboardMovementController _keyboardMove;
+    private SpriteRenderer _spriteRenderer;
 
     void Start()
     {
@@ -36,7 +46,9 @@ public class Player : MonoBehaviour {
         _controller = GetComponent<CharacterController2D>();
         _movement = GetComponent<MovementController>();
         _keyboardMove = GetComponent<KeyboardMovementController>();
+        _spriteRenderer = GetComponent<SpriteRenderer>();
 
+        spriteColor = _spriteRenderer.color;
     }
 
     #region Event Listeners
@@ -92,12 +104,26 @@ public class Player : MonoBehaviour {
                 GameMaster.KillPlayer(this);
             }
         }
-        
     }
 
     public void stopInput(int time)
     {
         StartCoroutine(freezeInput(time));
+    }
+
+    public void FlashPlayer(Color color, int frames)
+    {
+        StartCoroutine(Flash(color, frames));
+    }
+
+    public void SetColor(Color color, int frames)
+    {
+        StartCoroutine(StayColor(color, frames));
+    }
+
+    public void StopTurnaround(int frames)
+    {
+        StartCoroutine(freezeTurnaround(frames));
     }
 
     IEnumerator setInvulnerable(int frames)
@@ -114,6 +140,37 @@ public class Player : MonoBehaviour {
         for(int i = 0; i < time; i++)
             yield return new WaitForEndOfFrame();
         preventInput = false;
+    }
+
+    IEnumerator Flash(Color color, int frames)
+    {
+        for (int i = 0; i < frames / 2; i++)
+        {
+            _spriteRenderer.color = color;
+            yield return new WaitForEndOfFrame();
+            _spriteRenderer.color = spriteColor;
+            yield return new WaitForEndOfFrame();
+        }
+    }
+
+    IEnumerator StayColor(Color color, int frames)
+    {
+        _spriteRenderer.color = color;
+        for (int i = 0; i < frames; i++)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        _spriteRenderer.color = spriteColor;
+    }
+
+    IEnumerator freezeTurnaround(int frames)
+    {
+        preventTurnaround = true;
+        for (int i = 0; i < frames; i++)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        preventTurnaround = false;
     }
 
     void OnDisable()

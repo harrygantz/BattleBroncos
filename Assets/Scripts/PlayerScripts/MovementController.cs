@@ -60,9 +60,7 @@ public class MovementController : MonoBehaviour
     private CharacterController2D _controller;
     private Animator _animator;
     private RaycastHit2D _lastControllerColliderHit;
-    private SpriteRenderer _spriteRenderer;
     private Player _player;
-    private Color spriteColor;
     private Transform playerTransform;
 
     private Vector3 velocityLastFrame;
@@ -75,9 +73,6 @@ public class MovementController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _controller = GetComponent<CharacterController2D>();
         _player = GetComponent<Player>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-
-        spriteColor = _spriteRenderer.color;
 
         shouldJump = false;
         // listen to some events for illustration purposes
@@ -118,11 +113,18 @@ public class MovementController : MonoBehaviour
             if (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump))
             {
                 holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
-                Debug.Log("velocity saved: " + holdXVelocityForWallJump);
             }
+            Debug.Log(_controller.collisionState.left);
             if (((_controller.collisionState.right && transform.localScale.x == 1) || (_controller.collisionState.left && transform.localScale.x == -1)) && !_controller.isGrounded) //player is facing wall
             {
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+                Debug.Log(gameObject + " FUCK");
+                Turnaround(true);
+            }
+            if (!_controller.isGrounded)
+            {
+                _player.SetColor(Color.grey, 10);
+                StartCoroutine(freezeLeftRight(10));
+                //_player.preventTurnaround = true;
             }
         }
 
@@ -133,6 +135,7 @@ public class MovementController : MonoBehaviour
         if (col.transform.tag == "Wall")
         {
             collidingWithWall = false;
+            //_player.preventTurnaround = false;
         }
     }
 
@@ -141,6 +144,7 @@ public class MovementController : MonoBehaviour
         if (col.transform.tag == "Wall")
         {
             collidingWithWall = true;
+            //_player.preventTurnaround = true;
         }
     }
     #endregion
@@ -177,14 +181,14 @@ public class MovementController : MonoBehaviour
             //}
 
             //Left Stick
-            if (Input.GetAxis(HorizontalControl) > 0.5 && !preventLeftRight) //right
+            if (isHoldingRight() && !preventLeftRight) //right
             {
                 isBeingKnockedBack = false; //If the player gets out of hitstun while in air they should continue moving until they input
                 shouldMoveRight = true;
                 if (_controller.isGrounded)
                     _animator.SetBool("playerWalking", true);
             }
-            else if (Input.GetAxis(HorizontalControl) < -0.5 && !preventLeftRight) //left
+            else if (isHoldingLeft() && !preventLeftRight) //left
             {
                 isBeingKnockedBack = false; //If the player gets out of hitstun while in air they should continue moving until they input
                 shouldMoveLeft = true;
@@ -209,7 +213,7 @@ public class MovementController : MonoBehaviour
                 shouldSlideDownWall = false;
             }
 
-            if (Input.GetAxis(VerticalControl) > 0.5) //down
+            if (isHoldingDown()) //down
             {
                 if (_controller.isGrounded)
                 {
@@ -222,10 +226,10 @@ public class MovementController : MonoBehaviour
             }
 
             //Charge
-            if (Input.GetAxis(ChargeAxis) < -0.5)
+            if (isHoldingCharge())
             {
                 shouldCharge = true;
-                transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(true);
+                //transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(true);
             } else
             {
                 shouldCharge = false;
@@ -234,14 +238,14 @@ public class MovementController : MonoBehaviour
             }
 
             //Jump
-            if (!_controller.isGrounded && collidingWithWall && Input.GetButtonDown(JumpButton)) //wall jump
+            if (!_controller.isGrounded && collidingWithWall && isPressingDownJump()) //wall jump
             {
                 shouldWallJump = true;
                 canDoubleJump = true;
                 _animator.SetBool("canDoubleJump", true);
                 _animator.SetBool("playerJumping", true);
             }
-            else if (Input.GetButtonDown(JumpButton) && canDoubleJump) //regular jump
+            else if (isPressingDownJump() && canDoubleJump) //regular jump
             {
                 shouldJump = true;
                 _animator.SetBool("canDoubleJump", true);
@@ -252,13 +256,13 @@ public class MovementController : MonoBehaviour
                 }
                 _animator.SetBool("playerJumping", true);
             }
-            if (Input.GetButtonDown(JumpButton))
+            if (isPressingDownJump())
             {
                 _animator.SetInteger("jumpCount", jumps += 1);
             }
 
             //Charge
-            if (Input.GetButtonDown(DebugButton))
+            if (isPressingDownDebug())
             {
                 //Debug shit in here, this code doesn't matter
                 list.Sort();
@@ -297,9 +301,9 @@ public class MovementController : MonoBehaviour
         if (shouldMoveRight)
         {
             normalizedHorizontalSpeed = 1;
-            if (transform.localScale.x < 0f && (_controller.isGrounded || !shouldCharge))
+            if (transform.localScale.x < 0f && _controller.isGrounded)
             {
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+                Turnaround();
             }
             if (shouldCharge && (_velocity.x += accelerationToUse * Time.deltaTime) > walkSpeed)
             {
@@ -314,9 +318,9 @@ public class MovementController : MonoBehaviour
         else if (shouldMoveLeft)
         {
             normalizedHorizontalSpeed = -1;
-            if (transform.localScale.x > 0 && (_controller.isGrounded || !shouldCharge) )
+            if (transform.localScale.x > 0 && _controller.isGrounded )
             {
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+                Turnaround();
             }
             if (shouldCharge && (_velocity.x -= accelerationToUse * Time.deltaTime) < -walkSpeed)
             {
@@ -367,7 +371,6 @@ public class MovementController : MonoBehaviour
         {
             float horzVelocity = baseWallJumpSpeed;
             float vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * baseWallJumpSpeed;
-            Debug.Log("Velocity used: " + holdXVelocityForWallJump);
             if (holdingTowardsWall())
             {
                 if (shouldCharge)//just slide up wall
@@ -395,7 +398,8 @@ public class MovementController : MonoBehaviour
             currentSpeed = horzVelocity * transform.localScale.x;
             _velocity.y = vertVelocity * 1.5f;
 
-            freezeLeftRight(5);
+           // _player.StopTurnaround(10);
+            StartCoroutine(freezeLeftRight(5));
             holdXVelocityForWallJump = 0;
             didWallJump = true;
             shouldApplyGravity = false;
@@ -431,7 +435,6 @@ public class MovementController : MonoBehaviour
             currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed, maxSpeed);
             if (didWallJump)
             {
-                Debug.Log(currentSpeed);
                 _velocity.x = currentSpeed;
             }
             else
@@ -467,19 +470,7 @@ public class MovementController : MonoBehaviour
         list.Add(knockBackAmt.y);
         isBeingKnockedBack = true;
         _velocity = knockBackAmt;
-        StartCoroutine(FlashPlayer(Color.red, _player.hitStunFrames));
-    }
-
-
-    IEnumerator FlashPlayer(Color color, int frames)
-    {
-        for (int i = 0; i < frames / 2; i++)
-        {
-            _spriteRenderer.color = color;
-            yield return new WaitForEndOfFrame();
-            _spriteRenderer.color = spriteColor;
-            yield return new WaitForEndOfFrame();
-        }
+        _player.SetColor(Color.red, _player.hitStunFrames);
     }
 
     IEnumerator freezeLeftRight(int time)
@@ -492,7 +483,7 @@ public class MovementController : MonoBehaviour
 
     private bool holdingTowardsWall()
     {
-        return ((_controller.collisionState.right && Input.GetAxis(HorizontalControl) > 0.5) || (_controller.collisionState.left && Input.GetAxis(HorizontalControl) < -0.5));
+        return ((_controller.collisionState.right && isHoldingRight()) || (_controller.collisionState.left && isHoldingLeft()));
     }
 
     private bool movingFowards()
@@ -504,4 +495,89 @@ public class MovementController : MonoBehaviour
         );
     }
 
+    private bool isHoldingRight()
+    {
+        if (_player.useKeyboard)
+        {
+            return Input.GetKey("right");
+        }
+        else
+        {
+            return Input.GetAxis(HorizontalControl) > 0.5;
+        }
+    }
+
+    private bool isHoldingLeft()
+    {
+        if (_player.useKeyboard)
+        {
+            return Input.GetKey("left");
+        }
+        else
+        {
+            return Input.GetAxis(HorizontalControl) < -0.5;
+        }
+    }
+
+    private bool isHoldingDown()
+    {
+        if (_player.useKeyboard)
+        {
+            return Input.GetKey("down");
+        }
+        else
+        {
+            return Input.GetAxis(VerticalControl) > 0.5;
+        }
+    }
+
+    private bool isHoldingCharge()
+    {
+        if (_player.useKeyboard)
+        {
+            return Input.GetKey(KeyCode.LeftShift);
+        }
+        else
+        {
+            return Input.GetAxis(ChargeAxis) < -0.5;
+        }
+    }
+
+    private bool isPressingDownJump()
+    {
+        if (_player.useKeyboard)
+        {
+            return (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown("up"));
+        }
+        else
+        {
+            return Input.GetButtonDown(JumpButton);
+        }
+    }
+
+    private bool isPressingDownDebug()
+    {
+        if (_player.useKeyboard)
+        {
+            return Input.GetKeyDown(KeyCode.Tab);
+        }
+        else
+        {
+            return Input.GetButtonDown(DebugButton);
+        }
+    }
+
+    private void Turnaround(bool ignorePreventTurnaround = false)
+    {
+        if (ignorePreventTurnaround)
+        {
+            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+        }
+        else
+        {
+                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+        }
+        
+    }
 }
+

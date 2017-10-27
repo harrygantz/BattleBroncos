@@ -1,18 +1,22 @@
 fileFormatVersion: 2
-guid: 45fb1a99d082593439faf33d1716d55f
-timeCreated: 1508203430
+guid: 68ccc7c2379e8314f9a7fd2a7e34e157
+timeCreated: 1508885325
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: main_jump_0
-    21300002: main_jump_1
-    21300004: main_jump_2
-    21300006: main_jump_3
-    21300008: main_jump_4
-    21300010: main_jump_5
-    21300012: main_jump_6
-    21300014: main_jump_7
-    21300016: main_jump_8
+    21300000: new_run_1_0
+    21300002: new_run_1_1
+    21300004: new_run_1_2
+    21300006: new_run_1_3
+    21300008: new_run_1_4
+    21300010: new_run_1_5
+    21300012: new_run_1_6
+    21300014: new_run_1_7
+    21300016: new_run_1_8
+    21300018: new_run_1_9
+    21300020: new_run_1_10
+    21300022: new_run_1_11
+    21300024: new_run_1_12
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -54,7 +58,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 12
+  spritePixelsToUnits: 20
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -84,127 +88,183 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: main_jump_0
+      name: new_run_1_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 34
+        y: 256
+        width: 64
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_1
+      name: new_run_1_1
       rect:
         serializedVersion: 2
-        x: 52
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 162
+        y: 256
+        width: 82
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_2
+      name: new_run_1_2
       rect:
         serializedVersion: 2
-        x: 104
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 290
+        y: 255
+        width: 77
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_3
+      name: new_run_1_3
       rect:
         serializedVersion: 2
-        x: 156
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 35
+        y: 192
+        width: 82
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_4
+      name: new_run_1_4
       rect:
         serializedVersion: 2
-        x: 208
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 162
+        y: 192
+        width: 76
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_5
+      name: new_run_1_5
       rect:
         serializedVersion: 2
-        x: 260
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 290
+        y: 192
+        width: 78
+        height: 61
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_6
+      name: new_run_1_6
       rect:
         serializedVersion: 2
-        x: 312
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 33
+        y: 127
+        width: 78
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_7
+      name: new_run_1_7
       rect:
         serializedVersion: 2
-        x: 364
-        y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        x: 162
+        y: 130
+        width: 88
+        height: 57
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: main_jump_8
+      name: new_run_1_8
       rect:
         serializedVersion: 2
-        x: 416
+        x: 290
+        y: 129
+        width: 85
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: new_run_1_9
+      rect:
+        serializedVersion: 2
+        x: 34
+        y: 65
+        width: 88
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: new_run_1_10
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 65
+        width: 80
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: new_run_1_11
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 63
+        width: 84
+        height: 60
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: new_run_1_12
+      rect:
+        serializedVersion: 2
+        x: 34
         y: 0
-        width: 52
-        height: 32
-      alignment: 9
-      pivot: {x: 0.25, y: 0.31}
+        width: 78
+        height: 59
+      alignment: 0
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
