@@ -32,13 +32,16 @@ public class DoesDamage : MonoBehaviour
         {
             float knockback = useVelocity ? _movement._velocity.x : intensity;
             float realAngle = angle;
-            if (knockback > -1 && knockback < 1)
+            if (useVelocity)
             {
-                knockback = 10;
-                realAngle = 70f;
+                if (knockback > -1 && knockback < 1)
+                {
+                    knockback = 10;
+                    realAngle = 70f;
+                }
+                if (_movement._velocity.y < 0)
+                    realAngle = 290;
             }
-            if (_movement._velocity.y < 0)
-                realAngle = 290;
             float horzVelocity = Mathf.Cos(realAngle * Mathf.Deg2Rad) * Mathf.Abs(knockback);
             float vertVelocity = Mathf.Sin(realAngle * Mathf.Deg2Rad) * Mathf.Abs(knockback);
 

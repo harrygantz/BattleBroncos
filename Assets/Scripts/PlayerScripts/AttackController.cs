@@ -22,7 +22,7 @@ public class AttackController : MonoBehaviour {
             if (isPressingDownStab())
             {
                 _animator.SetBool("playerStabbing", true);
-                StartCoroutine(Stab(3, 8, 10));
+                StartCoroutine(Stab(2, 8, 5));
             }
             else
                 _animator.SetBool("playerStabbing", false);

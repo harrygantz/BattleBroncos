@@ -28,7 +28,6 @@ public class Player : MonoBehaviour {
     private Level thisLevel;
     private CharacterController2D _controller;
     private MovementController _movement;
-    private KeyboardMovementController _keyboardMove;
     private SpriteRenderer _spriteRenderer;
 
     void Start()
@@ -45,7 +44,6 @@ public class Player : MonoBehaviour {
 
         _controller = GetComponent<CharacterController2D>();
         _movement = GetComponent<MovementController>();
-        _keyboardMove = GetComponent<KeyboardMovementController>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
 
         spriteColor = _spriteRenderer.color;
