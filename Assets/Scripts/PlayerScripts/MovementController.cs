@@ -63,6 +63,7 @@ public class MovementController : MonoBehaviour
     private RaycastHit2D _lastControllerColliderHit;
     private Player _player;
     private Transform playerTransform;
+    private LanceRotation _lanceRotation;
 
     private Vector3 velocityLastFrame;
     private Vector3 reflectedVelocity;
@@ -74,6 +75,7 @@ public class MovementController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _controller = GetComponent<CharacterController2D>();
         _player = GetComponent<Player>();
+        _lanceRotation = transform.Find("Lance").GetComponent<LanceRotation>();
 
         shouldJump = false;
         shouldApplyGravity = true;
@@ -176,6 +178,7 @@ public class MovementController : MonoBehaviour
         //Debug.Log(GetJoystickAngle() * Mathf.Rad2Deg);
 
         #region Input
+        _lanceRotation.RotateLance(GetJoystickAngle() * Mathf.Rad2Deg);
         if (!_player.preventInput)
         {
             //Left Stick
@@ -307,7 +310,7 @@ public class MovementController : MonoBehaviour
 
             if (collidingWithWall && !_controller.isGrounded && shouldStickToWall)
             {
-                StartCoroutine(stickToWall(10));
+                StartCoroutine(stickToWall(7));
                 shouldStickToWall = false;
             }
             else if (shouldCharge && (_velocity.x += accelerationToUse * Time.deltaTime) > walkSpeed)
@@ -330,7 +333,7 @@ public class MovementController : MonoBehaviour
 
             if (collidingWithWall && !_controller.isGrounded && shouldStickToWall)
             {
-                StartCoroutine(stickToWall(10));
+                StartCoroutine(stickToWall(7));
                 shouldStickToWall = false;
             }
             else if (shouldCharge && (_velocity.x -= accelerationToUse * Time.deltaTime) < -walkSpeed)
@@ -385,12 +388,11 @@ public class MovementController : MonoBehaviour
                 angle = angle / 3;
             else if (angle > 90 && angle <= 180)
             {
-                angle = (angle - (angle - 90)) / 3;
-                angle = 180 - angle;
+                angle = 180 - ((180 - angle) / 2);
             }
             else if (angle > -180 && angle <= -90)
             {
-                angle = (angle + (angle + 90)) /3;
+                angle = -180 + ((-180 + angle) / 2);
                 angle = -180 + angle;
             }
             angle = angle * Mathf.Deg2Rad;
@@ -426,6 +428,8 @@ public class MovementController : MonoBehaviour
            // _player.StopTurnaround(10);
             StartCoroutine(freezeLeftRight(10));
             StartCoroutine(freezeGravity(10));
+            StartCoroutine(setHitbox(5, transform.Find("Hitboxes").Find("Charge").gameObject));
+            _player.FlashPlayer(Color.blue, 5);
             holdXVelocityForWallJump = 0;
             didWallJump = true;
             shouldApplyGravity = false;
@@ -437,8 +441,8 @@ public class MovementController : MonoBehaviour
         }
         if (shouldFastFall)
         {
-            //gravityToUse = 6f * gravity;
-            _velocity.y = 6f * -jumpHeight;
+            gravityToUse = 3f * gravity;
+            //_velocity.y = 6f * -jumpHeight;
             shouldFastFall = false;
         }
 
@@ -521,6 +525,14 @@ public class MovementController : MonoBehaviour
         for (int i = 0; i < frames; i++)
             yield return new WaitForEndOfFrame();
         preventLeftRight = false;
+    }
+
+    IEnumerator setHitbox(int frames, GameObject hitbox)
+    {
+        hitbox.SetActive(true);
+        for (int i = 0; i < frames; i++)
+            yield return new WaitForEndOfFrame();
+        hitbox.SetActive(false);
     }
 
     private bool holdingTowardsWall()
@@ -622,8 +634,9 @@ public class MovementController : MonoBehaviour
         }
         else
         {
-                transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
+            transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
         }
+        _lanceRotation.Flip();
         
     }
 }
