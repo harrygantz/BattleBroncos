@@ -95,7 +95,7 @@ public class Player : MonoBehaviour {
             playerStats.health += damage;
             hitStunFrames = Mathf.RoundToInt(playerStats.health/3 + 10);
             stopInput(hitStunFrames);
-            _movement.knockBack(0.03f * playerStats.health * knockBackAmt);
+            _movement.knockBack(0.045f * playerStats.health * knockBackAmt);
             StartCoroutine(setInvulnerable(10));
             if (playerStats.health <= 0)
             {

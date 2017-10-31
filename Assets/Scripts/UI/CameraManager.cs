@@ -95,4 +95,43 @@ public class CameraManager : MonoBehaviour {
     {
         instance = this;
     }
+
+    public void ShakeCamera(int frames)
+    {
+        StartCoroutine(Shake(frames));
+    }
+
+    IEnumerator Shake(int frames)
+    {
+
+        float elapsed = 0.0f;
+
+        Vector3 originalCamPos = Camera.main.transform.position;
+
+        while (elapsed < frames)
+        {
+
+            elapsed += 1;
+
+            float percentComplete = elapsed / frames;
+            float damper = 1.0f - Mathf.Clamp(4.0f * percentComplete - 3.0f, 0.0f, 1.0f);
+
+            // map value to [-1, 1]
+            float x = Random.value * 0.25f * damper;
+            float y = Random.value * 0.25f * damper;
+            if (frames%2 == 0)
+            {
+                x = -x;
+                y = -y;
+            }
+
+            Debug.Log(x + ", " + y);
+
+            Camera.main.transform.position = new Vector3(originalCamPos.x + x, originalCamPos.y + y, originalCamPos.z);
+
+            yield return new WaitForEndOfFrame();
+        }
+
+        Camera.main.transform.position = originalCamPos;
+    }
 }

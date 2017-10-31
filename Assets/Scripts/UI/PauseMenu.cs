@@ -31,13 +31,13 @@ public class PauseMenu : MonoBehaviour {
         if (!paused)
         {
             PauseUI.SetActive(false);
-            Time.timeScale = 1;
         }
 
     }
 
     public void Resume()
     {
+        Time.timeScale = 1;
         paused = false;
     }
 
