@@ -59,6 +59,7 @@ public class MovementController : MonoBehaviour
     private float normalizedHorizontalSpeed = 0;
     private float currentSpeed;
     private float holdXVelocityForWallJump;
+    private float everyFiveFrames;
     private float lanceAngle;
 
     private CharacterController2D _controller;
@@ -70,9 +71,10 @@ public class MovementController : MonoBehaviour
     private CameraManager _cameraManager;
 
     private Vector3 velocityLastFrame;
+    private Vector3 velocityFiveFramesAgo;
     private Vector3 reflectedVelocity;
 
-    private List<float> list = new List<float>();
+    private List<float> list;
 
     void Awake()
     {
@@ -84,7 +86,8 @@ public class MovementController : MonoBehaviour
 
         shouldJump = false;
         shouldApplyGravity = true;
-
+        list = new List<float>();
+        everyFiveFrames = 0;
         // listen to some events for illustration purposes
         _controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerStayEvent += onTriggerStayEvent;
@@ -128,6 +131,10 @@ public class MovementController : MonoBehaviour
             if (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump))
             {
                 holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
+            }
+            else if (Mathf.Abs(velocityFiveFramesAgo.x) > Mathf.Abs(holdXVelocityForWallJump))
+            {
+                holdXVelocityForWallJump = Mathf.Abs(velocityFiveFramesAgo.x);
             }
 
             if (!_controller.isGrounded)
@@ -179,21 +186,17 @@ public class MovementController : MonoBehaviour
             holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
         }
 
-        //Debug.Log(GetJoystickAngle() * Mathf.Rad2Deg);
-
         #region Input
         {
             float joystickAngle = GetJoystickAngle() * Mathf.Rad2Deg;
-            if ((joystickAngle > 0 && joystickAngle <= 90) || (joystickAngle < 0 && joystickAngle >= -90))
-                lanceAngle = joystickAngle / 2;
+            if (joystickAngle >= 0 && joystickAngle <= 90)
+                lanceAngle = Mathf.Clamp(joystickAngle, 0, 65);
+            else if (joystickAngle < 0 && joystickAngle >= -90)
+                lanceAngle = Mathf.Clamp(joystickAngle, -65, 0);
             else if (joystickAngle > 90 && joystickAngle <= 180)
-            {
-                lanceAngle = 180 - ((180 - joystickAngle) / 2);
-            }
+                lanceAngle = Mathf.Clamp(joystickAngle, 115, 180);
             else if (joystickAngle >= -180 && joystickAngle <= -90)
-            {
-                lanceAngle = -180 + ((180 + joystickAngle) / 2);
-            }
+                lanceAngle = Mathf.Clamp(joystickAngle, -180, -115);
             _lanceRotation.RotateLance(lanceAngle);
  
         }
@@ -290,11 +293,23 @@ public class MovementController : MonoBehaviour
             if (isPressingDownDebug())
             {
                 //Debug shit in here, this code doesn't matter
-                list.Sort();
+                Debug.Log("******************************************");
+                string nums = "";
                 foreach (float f in list)
                 {
-                    Debug.Log(f);
+                    nums = nums + (f + ", ");
                 }
+
+                float i = 0;
+                string time = "";
+                while (i < list.Count) {
+                    time = time + (i + ", ");
+                    i += 1;
+                }
+                Debug.Log("[" + nums);
+                Debug.Log("[" + time);
+
+                list = new List<float>();
             }
 
             if (_controller.isGrounded && (Input.GetAxis(VerticalControl) < -0.5) && Input.GetButtonDown(JumpButton))
@@ -330,7 +345,7 @@ public class MovementController : MonoBehaviour
             {
                 Turnaround();
             }
-            else if (shouldCharge && (_velocity.x += accelerationToUse * Time.deltaTime) > walkSpeed)
+            else if (shouldCharge && (_velocity.x += accelerationToUse * Time.deltaTime) > speedToUse)
             {
                 currentSpeed = _velocity.x += accelerationToUse * Time.deltaTime;
             }
@@ -347,7 +362,7 @@ public class MovementController : MonoBehaviour
             {
                 Turnaround();
             }
-            else if (shouldCharge && (_velocity.x -= accelerationToUse * Time.deltaTime) < -walkSpeed)
+            else if (shouldCharge && (_velocity.x -= accelerationToUse * Time.deltaTime) < -speedToUse)
             {
                 currentSpeed = _velocity.x -= accelerationToUse * Time.deltaTime;
             }
@@ -401,7 +416,7 @@ public class MovementController : MonoBehaviour
         }
         else if (shouldWallJump)
         {
-            if (GetJoystickAngle() == 0)
+            if (JoystickInNeutral())
             {
                 if (transform.localScale.x > 0)
                     lanceAngle = wallJumpAngle;
@@ -411,12 +426,20 @@ public class MovementController : MonoBehaviour
 
             float horzVelocity = Mathf.Cos(lanceAngle) * baseWallJumpSpeed;
             float vertVelocity = Mathf.Sin(lanceAngle) * baseWallJumpSpeed;
-            //((transform.localScale.x < 0 && ((lanceAngle >= 0 && lanceAngle < 90) || (lanceAngle > -90 && lanceAngle < 0))) || (transform.localScale.x > 0 && ((lanceAngle > 90 && lanceAngle < 180) || (lanceAngle < -90 && lanceAngle > -180))))
             
-            if (!holdingTowardsWall() && shouldCharge)
+            if (!LanceFacingWall() && shouldCharge)
             {
                 lanceAngle *= Mathf.Deg2Rad;
-                float wallJumpSpeed = holdXVelocityForWallJump > baseWallJumpSpeed ? holdXVelocityForWallJump : baseWallJumpSpeed;
+                float wallJumpSpeed;
+    
+                if ((holdXVelocityForWallJump > baseWallJumpSpeed && holdXVelocityForWallJump > 0) || (holdXVelocityForWallJump < -baseWallJumpSpeed && holdXVelocityForWallJump < 0))
+                {
+                    wallJumpSpeed = holdXVelocityForWallJump;
+                }
+                else
+                {
+                    wallJumpSpeed = baseWallJumpSpeed;
+                }
                 horzVelocity = Mathf.Cos(lanceAngle) * wallJumpSpeed * 1.2f;
                 vertVelocity = Mathf.Sin(lanceAngle) * wallJumpSpeed * 1.2f;
             }
@@ -444,7 +467,6 @@ public class MovementController : MonoBehaviour
             _player.SetColor(Color.blue, 20);
 
             // _player.StopTurnaround(10);
-            StartCoroutine(freezeLeftRight(5));
             StartCoroutine(freezeGravity(10));
             StartCoroutine(freezeFastFall(10));
             holdXVelocityForWallJump = 0;
@@ -454,7 +476,7 @@ public class MovementController : MonoBehaviour
         }
         if (shouldSlideDownWall && _velocity.y < 6f)
         {
-            _velocity.y = -1;
+            //_velocity.y = -1;
         }
         if (shouldFastFall)
         {
@@ -492,7 +514,16 @@ public class MovementController : MonoBehaviour
 
         if (shouldApplyGravity)
             _velocity.y += gravityToUse * Time.deltaTime;
+        float num;
+        if (_velocity.x > 0 )
+            num = (((_velocity.x + (5 / 2)) / 5) * 5);
+        else
+            num = (((_velocity.x - (5.0f / 2.0f)) / 5.0f) * 5.0f);
 
+        if (everyFiveFrames%5 == 0)
+        {
+            velocityFiveFramesAgo = _velocity;
+        }
         _controller.move(_velocity * Time.deltaTime);
         _velocity = _controller.velocity;
         velocityLastFrame = _velocity;
@@ -514,7 +545,7 @@ public class MovementController : MonoBehaviour
             Mathf.Sqrt(Mathf.Abs(knockBackAmt.y) * 10) * normalY,
             0
         );
-        list.Add(knockBackAmt.y);
+        //list.Add(knockBackAmt.y);
         isBeingKnockedBack = true;
         _velocity = knockBackAmt;
         _player.SetColor(Color.red, _player.hitStunFrames);
@@ -576,6 +607,15 @@ public class MovementController : MonoBehaviour
             return (collidingWithWall && isHoldingLeft(-0.01));
         else
             return (collidingWithWall && isHoldingRight(0.01));
+    }
+
+    private bool LanceFacingWall()
+    {
+        return ((transform.localScale.x < 0 &&
+               ((lanceAngle >= 0 && lanceAngle < 90) || (lanceAngle > -90 && lanceAngle < 0))) ||
+               (transform.localScale.x > 0 &&
+               ((lanceAngle > 90 && lanceAngle < 180) || (lanceAngle < -90 && lanceAngle > -180))
+        ));
     }
 
     private bool movingFowards()
@@ -663,6 +703,14 @@ public class MovementController : MonoBehaviour
     private float GetJoystickAngle()
     {
        return Mathf.Atan2(-Input.GetAxisRaw(VerticalControl), Input.GetAxisRaw(HorizontalControl));
+    }
+
+    private bool JoystickInNeutral()
+    {
+        return (Input.GetAxis(HorizontalControl) < 0.05 &&
+                Input.GetAxis(HorizontalControl) > -0.05 &&
+                Input.GetAxis(VerticalControl) < 0.05 &&
+                Input.GetAxis(VerticalControl) > -0.05);
     }
 
     private void Turnaround(bool ignorePreventTurnaround = false)

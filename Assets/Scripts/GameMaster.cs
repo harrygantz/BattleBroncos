@@ -17,7 +17,6 @@ public class GameMaster : MonoBehaviour {
         {
             gm = GameObject.FindGameObjectWithTag("GM").GetComponent<GameMaster>();
         }
-        Application.targetFrameRate = 60;
     }
 
     public Transform SpawnPoint;

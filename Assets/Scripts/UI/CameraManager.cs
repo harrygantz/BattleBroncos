@@ -125,8 +125,6 @@ public class CameraManager : MonoBehaviour {
                 y = -y;
             }
 
-            Debug.Log(x + ", " + y);
-
             Camera.main.transform.position = new Vector3(originalCamPos.x + x, originalCamPos.y + y, originalCamPos.z);
 
             yield return new WaitForEndOfFrame();
