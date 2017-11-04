@@ -391,6 +391,7 @@ public class MovementController : MonoBehaviour
         {
             _velocity.x = 0;
             _velocity.y = 0;
+            StartCoroutine(freezeGravity(1));
         }
 
         //Falling
