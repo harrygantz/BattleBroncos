@@ -9,6 +9,7 @@ public class DoesDamage : MonoBehaviour
     public float angle;
     public float intensity;
     public bool useVelocity;
+    public bool shouldStick;
     private Player _player;
     private MovementController _movement;
     // Use this for initialization
@@ -52,7 +53,8 @@ public class DoesDamage : MonoBehaviour
             horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
             vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
 
-            otherPlayer.takeDamage(damage, new Vector3(horzVelocity * _player.transform.localScale.x, vertVelocity, 0));
+            Vector3 KnockbackVector = new Vector3(horzVelocity * _player.transform.localScale.x, vertVelocity, 0);
+            otherPlayer.takeDamage(damage, KnockbackVector, gameObject, shouldStick);
         }
     }
 

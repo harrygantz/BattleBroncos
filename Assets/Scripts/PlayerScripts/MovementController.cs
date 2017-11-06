@@ -19,6 +19,7 @@ public class MovementController : MonoBehaviour
     public float wallJumpAngle;
     public float baseWallJumpSpeed;
     public float bouncinessFactor = 1f;
+    public bool isStickingToLance;
 
     public string JumpButton = "Jump_P1";
     public string HorizontalControl = "Horizontal_P1";
@@ -48,9 +49,11 @@ public class MovementController : MonoBehaviour
     private bool canDoubleJump;
     private bool preventMovement;
     private bool preventFastFall;
-    private bool collidingWithWall;
     private bool preventLeftRight;
     private bool joystickInNeutral;
+    private bool collidingWithCeiling;
+    private bool collidingWithWall;
+    private bool collidingWithSticky;
     private bool ifDidLerp;
 
     private int jumps = 0;
@@ -107,6 +110,7 @@ public class MovementController : MonoBehaviour
             reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
             isBouncingOff = true;
         }
+
         if (hit.normal.y == 1f)
             return;
 
@@ -125,9 +129,13 @@ public class MovementController : MonoBehaviour
 
     void onTriggerEnterEvent(Collider2D col)
     {
-        if (col.transform.tag == "Wall") 
+        if (col.transform.tag == "Wall" || col.transform.tag == "Ceiling") 
         {
+            if (isStickingToLance)
+                GameMaster.KillPlayer(GetComponent<Player>());
+
             collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
+            collidingWithCeiling = _controller.collisionState.above;
             if (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump))
             {
                 holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
@@ -146,25 +154,31 @@ public class MovementController : MonoBehaviour
 
     void onTriggerExitEvent(Collider2D col)
     {
-        if (col.transform.tag == "Wall")
+        if (col.transform.tag == "Wall" || col.transform.tag == "Ceiling")
         {
-            collidingWithWall = false;
-            //_player.preventTurnaround = false;
+            collidingWithWall = (_controller.collisionState.right || _controller.collisionState.left);
+            collidingWithCeiling = _controller.collisionState.above;
         }
+            //_player.preventTurnaround = false;
     }
 
     void onTriggerStayEvent(Collider2D col)
     {
         if (col.transform.tag == "Wall")
         {
-            collidingWithWall = true;
+            //collidingWithWall = collidingWithWall; //maintain value set by above
             //_player.preventTurnaround = true;
+        }
+        if (col.transform.tag == "Ceiling")
+        {
+            //collidingWithCeiling = collidingWithCeiling;
         }
     }
     #endregion
 
     void Update()
     {
+        collidingWithSticky = (collidingWithWall || collidingWithCeiling);
         //Reset Vars for isGrounded
         if (_controller.isGrounded)
         {
@@ -181,7 +195,7 @@ public class MovementController : MonoBehaviour
         }
 
         //Save Velocity for wall jump
-        if (collidingWithWall && (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump)))
+        if (collidingWithSticky && (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump)))
         {
             holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
         }
@@ -202,7 +216,7 @@ public class MovementController : MonoBehaviour
         }
         if (!_player.preventInput)
         {
-            if (!_controller.isGrounded && collidingWithWall && isHoldingCharge())
+            if (!_controller.isGrounded && collidingWithSticky && isHoldingCharge())
                 shouldStickToWall = true;
             else
                 shouldStickToWall = false;
@@ -266,7 +280,7 @@ public class MovementController : MonoBehaviour
             }
 
             //Jump
-            if (!_controller.isGrounded && collidingWithWall && isPressingDownJump()) //wall jump
+            if (!_controller.isGrounded && collidingWithSticky && isPressingDownJump()) //wall jump
             {
                 shouldWallJump = true;
                 canDoubleJump = true;
@@ -428,9 +442,11 @@ public class MovementController : MonoBehaviour
             float horzVelocity = Mathf.Cos(lanceAngle) * baseWallJumpSpeed;
             float vertVelocity = Mathf.Sin(lanceAngle) * baseWallJumpSpeed;
             
-            if (!LanceFacingWall() && shouldCharge)
+            if (shouldCharge && ((!LanceFacingWall() && collidingWithWall) || collidingWithCeiling))
             {
                 lanceAngle *= Mathf.Deg2Rad;
+                if (LanceFacingWall() && collidingWithCeiling)
+                    Turnaround();
                 float wallJumpSpeed;
     
                 if ((holdXVelocityForWallJump > baseWallJumpSpeed && holdXVelocityForWallJump > 0) || (holdXVelocityForWallJump < -baseWallJumpSpeed && holdXVelocityForWallJump < 0))
@@ -446,6 +462,7 @@ public class MovementController : MonoBehaviour
             }
             else
             {
+
                 if (transform.localScale.x > 0)
                     lanceAngle = wallJumpAngle;
                 else
@@ -464,7 +481,7 @@ public class MovementController : MonoBehaviour
             currentSpeed = horzVelocity;
             _velocity.y = vertVelocity;
 
-            StartCoroutine(setHitbox(20, transform.Find("Hitboxes").Find("Charge").gameObject));
+            StartCoroutine(setHitbox(20, transform.Find("Hitboxes").Find("WallJump").gameObject));
             _player.SetColor(Color.blue, 20);
 
             // _player.StopTurnaround(10);

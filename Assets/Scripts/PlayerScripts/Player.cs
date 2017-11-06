@@ -21,6 +21,9 @@ public class Player : MonoBehaviour {
     [HideInInspector]
     //Private
 
+    private bool shouldStickToLance;
+
+    private Player _otherPlayer;
     private Color spriteColor;
 
     private GameOver gameOverScreen;
@@ -88,19 +91,19 @@ public class Player : MonoBehaviour {
 
     }
 
-    public void takeDamage(int damage, Vector3 knockBackAmt)
+    public void takeDamage(int damage, Vector3 knockBackAmt, GameObject lance, bool shouldStick)
     {
         if (!invulerable)
         {
             playerStats.health += damage;
             hitStunFrames = Mathf.RoundToInt(playerStats.health/3 + 10);
             stopInput(hitStunFrames);
-            _movement.knockBack(0.045f * playerStats.health * knockBackAmt);
             StartCoroutine(setInvulnerable(10));
-            if (playerStats.health <= 0)
-            {
-                GameMaster.KillPlayer(this);
-            }
+                
+            if (shouldStick && playerStats.health >= 150)
+                StartCoroutine(stickToLance(40, lance));
+            else
+                _movement.knockBack(0.045f * playerStats.health * knockBackAmt);
         }
     }
 
@@ -171,11 +174,29 @@ public class Player : MonoBehaviour {
         preventTurnaround = false;
     }
 
+    IEnumerator stickToLance(int frames, GameObject lance)
+    {
+        _movement.isStickingToLance = true;
+        Vector3 newLocalScale = new Vector3(lance.transform.parent.parent.localScale.x, transform.localScale.y, transform.localScale.z);
+        transform.localScale = newLocalScale;
+        for (int i = 0; i < frames; i++)
+        {
+            for (int j = 0; j < 50; j++)
+            {
+                transform.position = new Vector3(lance.transform.position.x + (1.5f * newLocalScale.x), lance.transform.position.y, lance.transform.position.z);
+            }
+            yield return new WaitForEndOfFrame();
+        }
+        _movement.isStickingToLance = false;
+    }
+
     void OnDisable()
     {
         invulerable = false;
         preventInput = false;
         playerStats.health = 0;
+        _movement.isStickingToLance = false;
+        _spriteRenderer.color = spriteColor;
         _movement.resetVelocity();
     }
 
