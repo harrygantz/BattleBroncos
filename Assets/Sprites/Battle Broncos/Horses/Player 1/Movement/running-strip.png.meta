@@ -1,18 +1,22 @@
 fileFormatVersion: 2
-guid: af3545ff1358a064680241cc6d97cec8
-timeCreated: 1508203379
+guid: fe873b22b99a27346b04327fb785d56e
+timeCreated: 1510003987
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: walk_0
-    21300002: walk_1
-    21300004: walk_2
-    21300006: walk_3
-    21300008: walk_4
-    21300010: walk_5
-    21300012: walk_6
-    21300014: walk_7
-    21300016: walk_8
+    21300000: running-strip_0
+    21300002: running-strip_1
+    21300004: running-strip_2
+    21300006: running-strip_3
+    21300008: running-strip_4
+    21300010: running-strip_5
+    21300012: running-strip_6
+    21300014: running-strip_7
+    21300016: running-strip_8
+    21300018: running-strip_9
+    21300020: running-strip_10
+    21300022: running-strip_11
+  externalObjects: {}
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -54,7 +58,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 12
+  spritePixelsToUnits: 17
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -66,6 +70,7 @@ TextureImporter:
   platformSettings:
   - buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
+    resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
@@ -74,6 +79,7 @@ TextureImporter:
     overridden: 0
   - buildTarget: Standalone
     maxTextureSize: 2048
+    resizeAlgorithm: 0
     textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
@@ -84,127 +90,169 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: walk_0
+      name: running-strip_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_1
+      name: running-strip_1
       rect:
         serializedVersion: 2
-        x: 42
+        x: 100
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_2
+      name: running-strip_2
       rect:
         serializedVersion: 2
-        x: 84
+        x: 200
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_3
+      name: running-strip_3
       rect:
         serializedVersion: 2
-        x: 126
+        x: 300
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_4
+      name: running-strip_4
       rect:
         serializedVersion: 2
-        x: 168
+        x: 400
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_5
+      name: running-strip_5
       rect:
         serializedVersion: 2
-        x: 210
+        x: 500
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_6
+      name: running-strip_6
       rect:
         serializedVersion: 2
-        x: 252
+        x: 600
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_7
+      name: running-strip_7
       rect:
         serializedVersion: 2
-        x: 294
+        x: 700
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
     - serializedVersion: 2
-      name: walk_8
+      name: running-strip_8
       rect:
         serializedVersion: 2
-        x: 336
+        x: 800
         y: 0
-        width: 42
-        height: 32
+        width: 100
+        height: 75
       alignment: 9
-      pivot: {x: 0.31, y: 0.31}
+      pivot: {x: 0.403, y: 0.5419}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: running-strip_9
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.403, y: 0.5419}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: running-strip_10
+      rect:
+        serializedVersion: 2
+        x: 1000
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.403, y: 0.5419}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: running-strip_11
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.403, y: 0.5419}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
