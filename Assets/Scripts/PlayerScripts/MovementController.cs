@@ -22,6 +22,7 @@ public class MovementController : MonoBehaviour
     public bool isStickingToLance;
 
     public string JumpButton = "Jump_P1";
+    public string DashButton = "Dash_P1";
     public string HorizontalControl = "Horizontal_P1";
     public string VerticalControl = "Vertical_P1";
     public string ChargeAxis;
@@ -65,6 +66,17 @@ public class MovementController : MonoBehaviour
     private float everyFiveFrames;
     private float lanceAngle;
 
+    //Dash Variables//
+    public DashState dashState;
+    public float dashTimer;
+    public float dashVelocityX = 50.0f;
+    public float dashVelocityY = 40.0f;
+    public float dashTime = 0.5f;
+    public float dashCoolDown = 1.0f;
+    private Vector3 _savedVelocity;
+    private Vector3 _dash;
+    //End Dash Variables//
+
     private CharacterController2D _controller;
     private Animator _animator;
     private RaycastHit2D _lastControllerColliderHit;
@@ -76,6 +88,15 @@ public class MovementController : MonoBehaviour
     private Vector3 velocityLastFrame;
     private Vector3 velocityFiveFramesAgo;
     private Vector3 reflectedVelocity;
+
+    // Dash enumerator    
+    public enum DashState
+    {
+        Ready,
+        Dashing,
+        Cooldown
+    }
+    // END Dash enumerator
 
     private List<float> list;
 
@@ -199,6 +220,9 @@ public class MovementController : MonoBehaviour
         {
             holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
         }
+
+        if (Input.GetButtonDown(DashButton))
+            print("y pressed");
 
         #region Input
         {
@@ -330,6 +354,7 @@ public class MovementController : MonoBehaviour
                 shouldFallThroughOneWay = true;
         }
         #endregion
+
     }
 
     void FixedUpdate()
@@ -341,8 +366,46 @@ public class MovementController : MonoBehaviour
         normalizedHorizontalSpeed = 0;
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; //how fast do we change direction?
 
+        #region Dash
+        // Dash ability 
+        switch (dashState)
+        {
+            case DashState.Ready:
+                var isDashButtonDown = Input.GetButtonDown(DashButton);
+                if (isDashButtonDown)
+                {
+                   // gravity = 0;
+                    _savedVelocity = new Vector3(0, 0, 0);
+                    _dash = new Vector3(Input.GetAxis(HorizontalControl) * dashVelocityX, -Input.GetAxis(VerticalControl) * dashVelocityY);
+                    _velocity = _dash;
+                    dashState = DashState.Dashing;
+                }
+                break;
+            case DashState.Dashing:
+                dashTimer += Time.deltaTime;
+                if (dashTimer >= dashTime)
+                {
+                    dashTimer = dashCoolDown;
+                    _velocity = _savedVelocity;
+                   // gravity = -25;
+                    dashState = DashState.Cooldown;
+                }
+
+                break;
+            case DashState.Cooldown:
+                dashTimer -= Time.deltaTime;
+                if (dashTimer <= 0)
+                {
+                    dashTimer = 0;
+                    dashState = DashState.Ready;
+                }
+                break;
+        } // END dash ability
+        #endregion
+
+
         //Move Left or Right
-        if(_controller.isGrounded) {
+        if (_controller.isGrounded) {
             speedToUse = walkSpeed;
             accelerationToUse = chargeAcceleration;
         }
@@ -365,7 +428,7 @@ public class MovementController : MonoBehaviour
             }
             else
             {
-                currentSpeed = speedToUse;
+                currentSpeed = walkSpeed;
             }
             shouldMoveRight = false;
         }
@@ -547,6 +610,7 @@ public class MovementController : MonoBehaviour
         velocityLastFrame = _velocity;
         //shouldApplyGravity = true;
         didWallJump = false;
+
     }
 
     public void resetVelocity()
