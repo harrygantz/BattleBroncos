@@ -16,7 +16,6 @@ public class DoesDamage : MonoBehaviour
 
     void Start()
     {
-        _player = GetComponentInParent<Player>();
         _movement = GetComponentInParent<MovementController>();
     }
 
@@ -28,6 +27,7 @@ public class DoesDamage : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D col)
     {
+        _player = GetComponentInParent<Player>(); //hack fix
         Player otherPlayer = col.gameObject.GetComponentInParent<Player>();
         if (otherPlayer != null)
         {
@@ -52,7 +52,6 @@ public class DoesDamage : MonoBehaviour
                 vertVelocity = 0;
             horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
             vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
-
             Vector3 KnockbackVector = new Vector3(horzVelocity * _player.transform.localScale.x, vertVelocity, 0);
             otherPlayer.takeDamage(damage, KnockbackVector, gameObject, shouldStick);
         }

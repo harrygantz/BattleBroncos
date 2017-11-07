@@ -33,6 +33,8 @@ public class MovementController : MonoBehaviour
 
     private bool isBeingKnockedBack;
     private bool isBouncingOff;
+    private bool isDashing;
+    private bool isCoolingDownDash;
     private bool shouldDeccellerate;
     private bool shouldJump;
     private bool shouldWallJump;
@@ -41,6 +43,7 @@ public class MovementController : MonoBehaviour
     private bool shouldMoveLeft;
     private bool shouldFallThroughOneWay;
     private bool shouldFastFall;
+    private bool shouldDash;
     private bool shouldSlideDownWall;
     private bool shouldResetXVelocity;
     private bool shouldApplyGravity;
@@ -68,13 +71,15 @@ public class MovementController : MonoBehaviour
 
     //Dash Variables//
     public DashState dashState;
+    public GameObject dashHitBox;
     public float dashTimer;
     public float dashVelocityX = 50.0f;
     public float dashVelocityY = 40.0f;
-    public float dashTime = 0.5f;
-    public float dashCoolDown = 1.0f;
+    public int activeDashFrames = 10;
+    public int dashCooldownFrames = 60;
     private Vector3 _savedVelocity;
     private Vector3 _dash;
+    private Coroutine dashingRoutine;
     //End Dash Variables//
 
     private CharacterController2D _controller;
@@ -159,11 +164,11 @@ public class MovementController : MonoBehaviour
             collidingWithCeiling = _controller.collisionState.above;
             if (Mathf.Abs(velocityLastFrame.x) > Mathf.Abs(holdXVelocityForWallJump))
             {
-                holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
+                holdXVelocityForWallJump = Mathf.Sqrt((velocityLastFrame.x * velocityLastFrame.x) + (velocityLastFrame.y * velocityLastFrame.y));
             }
             else if (Mathf.Abs(velocityFiveFramesAgo.x) > Mathf.Abs(holdXVelocityForWallJump))
             {
-                holdXVelocityForWallJump = Mathf.Abs(velocityFiveFramesAgo.x);
+                holdXVelocityForWallJump = Mathf.Sqrt((velocityFiveFramesAgo.x * velocityFiveFramesAgo.x) + (velocityFiveFramesAgo.y * velocityFiveFramesAgo.y));
             }
 
             if (!_controller.isGrounded)
@@ -221,9 +226,6 @@ public class MovementController : MonoBehaviour
             holdXVelocityForWallJump = Mathf.Abs(velocityLastFrame.x);
         }
 
-        if (Input.GetButtonDown(DashButton))
-            print("y pressed");
-
         #region Input
         {
             float joystickAngle = GetJoystickAngle() * Mathf.Rad2Deg;
@@ -236,7 +238,6 @@ public class MovementController : MonoBehaviour
             else if (joystickAngle >= -180 && joystickAngle <= -90)
                 lanceAngle = Mathf.Clamp(joystickAngle, -180, -115);
             _lanceRotation.RotateLance(lanceAngle);
- 
         }
         if (!_player.preventInput)
         {
@@ -246,7 +247,11 @@ public class MovementController : MonoBehaviour
                 shouldStickToWall = false;
 
             //Left Stick
-            if (isHoldingRight() && !preventLeftRight && !shouldStickToWall) //right
+            if (Input.GetButtonDown(DashButton) && !isCoolingDownDash)
+            {
+                shouldDash = true;
+            }
+            else if (isHoldingRight() && !preventLeftRight && !shouldStickToWall) //right
             {
                 isBeingKnockedBack = false; //If the player gets out of hitstun while in air they should continue moving until they input
                 shouldMoveRight = true;
@@ -294,13 +299,11 @@ public class MovementController : MonoBehaviour
             if (isHoldingCharge())
             {
                 shouldCharge = true;
-                //transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(true);
             }
             else
             {
                 shouldCharge = false;
                 holdXVelocityForWallJump = 0f;
-                //transform.Find("Hitboxes").Find("Charge").gameObject.SetActive(false);
             }
 
             //Jump
@@ -366,46 +369,9 @@ public class MovementController : MonoBehaviour
         normalizedHorizontalSpeed = 0;
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; //how fast do we change direction?
 
-        #region Dash
-        // Dash ability 
-        switch (dashState)
-        {
-            case DashState.Ready:
-                var isDashButtonDown = Input.GetButtonDown(DashButton);
-                if (isDashButtonDown)
-                {
-                   // gravity = 0;
-                    _savedVelocity = new Vector3(0, 0, 0);
-                    _dash = new Vector3(Input.GetAxis(HorizontalControl) * dashVelocityX, -Input.GetAxis(VerticalControl) * dashVelocityY);
-                    _velocity = _dash;
-                    dashState = DashState.Dashing;
-                }
-                break;
-            case DashState.Dashing:
-                dashTimer += Time.deltaTime;
-                if (dashTimer >= dashTime)
-                {
-                    dashTimer = dashCoolDown;
-                    _velocity = _savedVelocity;
-                   // gravity = -25;
-                    dashState = DashState.Cooldown;
-                }
-
-                break;
-            case DashState.Cooldown:
-                dashTimer -= Time.deltaTime;
-                if (dashTimer <= 0)
-                {
-                    dashTimer = 0;
-                    dashState = DashState.Ready;
-                }
-                break;
-        } // END dash ability
-        #endregion
-
-
         //Move Left or Right
-        if (_controller.isGrounded) {
+        if (_controller.isGrounded)
+        {
             speedToUse = walkSpeed;
             accelerationToUse = chargeAcceleration;
         }
@@ -414,85 +380,112 @@ public class MovementController : MonoBehaviour
             speedToUse = airSpeed;
             accelerationToUse = airAcceleration;
         }
-         
-        if (shouldMoveRight)
-        {
-            normalizedHorizontalSpeed = 1;
-            if (transform.localScale.x < 0f && _controller.isGrounded)
-            {
-                Turnaround();
-            }
-            else if (shouldCharge && (_velocity.x += accelerationToUse * Time.deltaTime) > speedToUse)
-            {
-                currentSpeed = _velocity.x += accelerationToUse * Time.deltaTime;
-            }
-            else
-            {
-                currentSpeed = walkSpeed;
-            }
-            shouldMoveRight = false;
-        }
-        else if (shouldMoveLeft)
-        {
-            normalizedHorizontalSpeed = -1;
-            if (transform.localScale.x > 0 && _controller.isGrounded )
-            {
-                Turnaround();
-            }
-            else if (shouldCharge && (_velocity.x -= accelerationToUse * Time.deltaTime) < -speedToUse)
-            {
-                currentSpeed = _velocity.x -= accelerationToUse * Time.deltaTime;
-            }
-            else
-            {
-                currentSpeed = -speedToUse;
-            }
-            shouldMoveLeft = false;
-        }
-        else
-        {
-            if (_controller.isGrounded)
-            {
-                if (currentSpeed > decceleration * Time.deltaTime)
-                    currentSpeed -= decceleration * Time.deltaTime;
-                else if (currentSpeed < -decceleration * Time.deltaTime)
-                    currentSpeed += decceleration * Time.deltaTime;
-            }
-            else
-            {
-               //currentSpeed = shouldCharge ? (_velocity.x += transform.localScale.x * chargeAcceleration * Time.deltaTime) : -walkSpeed;
-            }
-        }
 
-        if (shouldStickToWall)
-        {
-            _velocity.x = 0;
-            _velocity.y = 0;
-            StartCoroutine(freezeGravity(1));
-        }
-
-        //Falling
-        if (shouldFallThroughOneWay)
-        {
-            _velocity.y *= 1f;
-            _controller.ignoreOneWayPlatformsThisFrame = true;
-            shouldFallThroughOneWay = false;
-        }
-
-        //Jumping
+        // Dash ability 
         bool didWallJump = false;
-        if (shouldJump)
+        if (shouldDash)
         {
-            _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
-            if (isBeingKnockedBack)
+            switch (dashState)
             {
-                isBeingKnockedBack = false;
-                _velocity.x = 0;
-            }
-            StartCoroutine(freezeFastFall(10));
-            shouldJump = false;
+                case DashState.Ready:
+                    {
+                        // gravity = 0;
+                        _savedVelocity = _velocity;
+                        _dash = new Vector3(Input.GetAxis(HorizontalControl) * dashVelocityX, -Input.GetAxis(VerticalControl) * dashVelocityY);
+                        if (LanceFacingWall())
+                            Turnaround();
+                        _velocity = _dash;
+                        dashState = DashState.Dashing;
+                    }
+                    break;
+                case DashState.Dashing:
+                    if (!isDashing)
+                        dashingRoutine = StartCoroutine(Dashing(activeDashFrames));
+                    break;
+                case DashState.Cooldown:
+                    if (!isCoolingDownDash)
+                        StartCoroutine(CooldownDash(dashCooldownFrames));
+                    break;
+            } // END dash ability
         }
-        else if (shouldWallJump)
+        else {
+            if (shouldMoveRight)
+            {
+                normalizedHorizontalSpeed = 1;
+                if (transform.localScale.x < 0f && _controller.isGrounded)
+                {
+                    Turnaround();
+                }
+                else if (shouldCharge)
+                {
+                    currentSpeed = _velocity.x += accelerationToUse * Time.deltaTime;
+                }
+                currentSpeed = Mathf.Clamp(currentSpeed, walkSpeed, maxSpeed);
+                shouldMoveRight = false;
+            }
+            else if (shouldMoveLeft)
+            {
+                normalizedHorizontalSpeed = -1;
+                if (transform.localScale.x > 0 && _controller.isGrounded)
+                {
+                    Turnaround();
+                }
+                else if (shouldCharge)
+                {
+                    currentSpeed = _velocity.x -= accelerationToUse * Time.deltaTime;
+                }
+                currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed, -walkSpeed);
+                shouldMoveLeft = false;
+            }
+            else
+            {
+                if (_controller.isGrounded)
+                {
+                    if (currentSpeed > decceleration * Time.deltaTime)
+                        currentSpeed -= decceleration * Time.deltaTime;
+                    else if (currentSpeed < -decceleration * Time.deltaTime)
+                        currentSpeed += decceleration * Time.deltaTime;
+                }
+                else
+                {
+                    //currentSpeed = shouldCharge ? (_velocity.x += transform.localScale.x * chargeAcceleration * Time.deltaTime) : -walkSpeed;
+                }
+            }
+
+            //Falling
+            if (shouldFallThroughOneWay)
+            {
+                _velocity.y *= 1f;
+                _controller.ignoreOneWayPlatformsThisFrame = true;
+                shouldFallThroughOneWay = false;
+            }
+
+            //Jumping
+            if (shouldJump)
+            {
+                _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
+                if (isBeingKnockedBack)
+                {
+                    isBeingKnockedBack = false;
+                    _velocity.x = 0;
+                }
+                StartCoroutine(freezeFastFall(10));
+                shouldJump = false;
+            }
+          
+            if (shouldSlideDownWall && _velocity.y < 6f)
+            {
+                //_velocity.y = -1;
+            }
+            if (shouldFastFall)
+            {
+                //gravityToUse = 3f * gravity;
+                _velocity.y = 6f * -jumpHeight;
+                shouldFastFall = false;
+            }
+        }
+
+        if (shouldWallJump)
         {
             if (JoystickInNeutral())
             {
@@ -501,17 +494,15 @@ public class MovementController : MonoBehaviour
                 else
                     lanceAngle = 180 - wallJumpAngle;
             }
-
             float horzVelocity = Mathf.Cos(lanceAngle) * baseWallJumpSpeed;
             float vertVelocity = Mathf.Sin(lanceAngle) * baseWallJumpSpeed;
-            
+
             if (shouldCharge && ((!LanceFacingWall() && collidingWithWall) || collidingWithCeiling))
             {
                 lanceAngle *= Mathf.Deg2Rad;
                 if (LanceFacingWall() && collidingWithCeiling)
                     Turnaround();
                 float wallJumpSpeed;
-    
                 if ((holdXVelocityForWallJump > baseWallJumpSpeed && holdXVelocityForWallJump > 0) || (holdXVelocityForWallJump < -baseWallJumpSpeed && holdXVelocityForWallJump < 0))
                 {
                     wallJumpSpeed = holdXVelocityForWallJump;
@@ -525,7 +516,6 @@ public class MovementController : MonoBehaviour
             }
             else
             {
-
                 if (transform.localScale.x > 0)
                     lanceAngle = wallJumpAngle;
                 else
@@ -533,7 +523,6 @@ public class MovementController : MonoBehaviour
                 lanceAngle *= Mathf.Deg2Rad;
                 horzVelocity = Mathf.Cos(wallJumpAngle * Mathf.Deg2Rad) * baseWallJumpSpeed * transform.localScale.x;
                 vertVelocity = Mathf.Sin(wallJumpAngle * Mathf.Deg2Rad) * baseWallJumpSpeed * 1.3f;
-
             }
             if (horzVelocity == -1)
                 horzVelocity = 0;
@@ -545,7 +534,7 @@ public class MovementController : MonoBehaviour
             _velocity.y = vertVelocity;
 
             StartCoroutine(setHitbox(20, transform.Find("Hitboxes").Find("WallJump").gameObject));
-            _player.SetColor(Color.blue, 20);
+            _player.SetColor(Color.yellow, 20);
 
             // _player.StopTurnaround(10);
             StartCoroutine(freezeGravity(10));
@@ -555,16 +544,19 @@ public class MovementController : MonoBehaviour
             shouldApplyGravity = false;
             shouldWallJump = false;
         }
-        if (shouldSlideDownWall && _velocity.y < 6f)
+        else if (shouldStickToWall)
         {
-            //_velocity.y = -1;
+            _velocity.x = 0;
+            _velocity.y = 0;
+            if (isDashing)
+            {
+                StopCoroutine(dashingRoutine);
+                isDashing = false;
+                dashState = DashState.Cooldown;
+            }
+            StartCoroutine(freezeGravity(1));
         }
-        if (shouldFastFall)
-        {
-            //gravityToUse = 3f * gravity;
-            _velocity.y = 6f * -jumpHeight;
-            shouldFastFall = false;
-        }
+
 
         //Knockback
         if (isBeingKnockedBack) //smooth only if not being knocked back
@@ -587,13 +579,14 @@ public class MovementController : MonoBehaviour
             {
                 _velocity.x = currentSpeed;
             }
-            else
+            else if (!isDashing)
             {
                 _velocity.x = Mathf.Lerp(_velocity.x, currentSpeed, Time.deltaTime * smoothedMovementFactor);
             }
         }
 
-        if (shouldApplyGravity)
+
+        if (shouldApplyGravity && !isDashing)
             _velocity.y += gravityToUse * Time.deltaTime;
         float num;
         if (_velocity.x > 0 )
@@ -605,6 +598,11 @@ public class MovementController : MonoBehaviour
         {
             velocityFiveFramesAgo = _velocity;
         }
+
+        if (collidingWithCeiling && !didWallJump)
+            _velocity.x = 0;
+        if (collidingWithCeiling && didWallJump)
+            Debug.Log(_velocity.x);
         _controller.move(_velocity * Time.deltaTime);
         _velocity = _controller.velocity;
         velocityLastFrame = _velocity;
@@ -681,6 +679,30 @@ public class MovementController : MonoBehaviour
         for (int i = 0; i < frames; i++)
             yield return new WaitForEndOfFrame();
         hitbox.SetActive(false);
+    }
+
+    IEnumerator Dashing(int frames)
+    {
+        isDashing = true;
+        dashHitBox.SetActive(true);
+        _player.SetColor(Color.yellow, frames);
+        for (int i = 0; i < frames; i++)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        dashState = DashState.Cooldown;
+        isDashing = false;
+    }
+
+    IEnumerator CooldownDash(int frames)
+    {
+        isCoolingDownDash = true;
+        shouldDash = false;
+        dashHitBox.SetActive(false);
+        for (int i = 0; i < frames; i++)
+            yield return new WaitForEndOfFrame();
+        dashState = DashState.Ready;
+        isCoolingDownDash = false;
     }
 
     private bool holdingTowardsWall()
