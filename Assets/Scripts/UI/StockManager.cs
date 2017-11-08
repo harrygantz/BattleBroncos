@@ -10,8 +10,7 @@ public class StockManager : MonoBehaviour {
     private Level thisLevel;
     public int stocksStart;
     private static int stocksMax = 4;
-    private int stocksCurrent = 0;
-
+    public int stocksCurrent = 0;
     public Image[] playerStocks;
 
 

@@ -27,7 +27,6 @@ public class Level : MonoBehaviour {
 
     public bool isBlasted(Transform t)
     {
-        return false;
         return (
                  t.position.y <= (bounds.center.y - bounds.extents.y - yBlastZoneOffset) ||
                  t.position.y >= (bounds.center.y + bounds.extents.y + yBlastZoneOffset) ||

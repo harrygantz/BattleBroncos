@@ -85,7 +85,8 @@ public class Player : MonoBehaviour {
         }
         if (stockManager.GetCurrentStocks() <= 0)
         {
-         //  GameMaster.GameOver();
+            gameObject.SetActive(false);
+            GameMaster.MinusPlayerCount();
         }
 
     }
@@ -104,6 +105,16 @@ public class Player : MonoBehaviour {
             else
                 _movement.knockBack(0.045f * playerStats.health * knockBackAmt);
         }
+    }
+
+    public Color getSpriteColor()
+    {
+        return spriteColor;
+    }
+
+    public Color getLanceColor()
+    {
+        return transform.Find("Lance").GetComponent<SpriteRenderer>().color;
     }
 
     public void stopInput(int time)

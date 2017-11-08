@@ -10,6 +10,7 @@ public class GameOver: MonoBehaviour
 
     private bool gameOver = false;
 
+
     void Start()
     {
         GameOverScreen.SetActive(false);
@@ -30,4 +31,5 @@ public class GameOver: MonoBehaviour
     {
         Application.Quit();
     }
+
 }

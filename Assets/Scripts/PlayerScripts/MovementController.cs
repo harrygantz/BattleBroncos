@@ -549,7 +549,7 @@ public class MovementController : MonoBehaviour
             currentSpeed = horzVelocity;
             _velocity.y = vertVelocity;
 
-            StartCoroutine(setHitbox(20, transform.Find("Hitboxes").Find("WallJump").gameObject));
+            StartCoroutine(setHitbox(20, transform.Find("Lance").Find("WallJump").gameObject));
             _player.SetColor(Color.yellow, 20);
 
             // _player.StopTurnaround(10);

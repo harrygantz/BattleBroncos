@@ -39,7 +39,7 @@ public class CameraManager : MonoBehaviour {
         cameraHolder = cam.transform.parent;
         cType = (cam.orthographic) ? CameraType.ortho : CameraType.persp;
         //If we want to add more players we need to tag them here
-        players.Add(GameObject.FindGameObjectWithTag("Player").transform);
+        players.Add(GameObject.FindGameObjectWithTag("Player1").transform);
         players.Add(GameObject.FindGameObjectWithTag("Player2").transform);
     }
 	
