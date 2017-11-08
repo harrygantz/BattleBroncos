@@ -15,7 +15,6 @@ public class Player : MonoBehaviour {
     public string healthUIName;
 
     public PlayerStats playerStats = new PlayerStats();
-
     public bool preventInput;
     public bool preventTurnaround;
     [HideInInspector]
@@ -82,11 +81,11 @@ public class Player : MonoBehaviour {
         GameMaster.UpdateHealth(healthUIName, playerStats.health);
         if (thisLevel.isBlasted(transform))
         {
-            GameMaster.KillPlayer(this);
+           GameMaster.KillPlayer(this);
         }
         if (stockManager.GetCurrentStocks() <= 0)
         {
-           GameMaster.GameOver();
+         //  GameMaster.GameOver();
         }
 
     }
