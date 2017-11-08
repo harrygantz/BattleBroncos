@@ -1,22 +1,21 @@
 fileFormatVersion: 2
-guid: 68ccc7c2379e8314f9a7fd2a7e34e157
-timeCreated: 1508885325
+guid: 4b186d829b2fd644d861e1e570eba394
+timeCreated: 1510097049
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: new_run_1_0
-    21300002: new_run_1_1
-    21300004: new_run_1_2
-    21300006: new_run_1_3
-    21300008: new_run_1_4
-    21300010: new_run_1_5
-    21300012: new_run_1_6
-    21300014: new_run_1_7
-    21300016: new_run_1_8
-    21300018: new_run_1_9
-    21300020: new_run_1_10
-    21300022: new_run_1_11
-    21300024: new_run_1_12
+    21300000: Running-strip_0
+    21300002: Running-strip_1
+    21300004: Running-strip_2
+    21300006: Running-strip_3
+    21300008: Running-strip_4
+    21300010: Running-strip_5
+    21300012: Running-strip_6
+    21300014: Running-strip_7
+    21300016: Running-strip_8
+    21300018: Running-strip_9
+    21300020: Running-strip_10
+    21300022: Running-strip_11
   serializedVersion: 4
   mipmaps:
     mipMapMode: 0
@@ -58,7 +57,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 17
+  spritePixelsToUnits: 12
   alphaUsage: 1
   alphaIsTransparency: 1
   spriteTessellationDetail: -1
@@ -88,183 +87,169 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: new_run_1_0
+      name: Running-strip_0
       rect:
         serializedVersion: 2
-        x: 34
-        y: 256
-        width: 64
-        height: 59
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_1
-      rect:
-        serializedVersion: 2
-        x: 162
-        y: 256
-        width: 82
-        height: 59
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_2
-      rect:
-        serializedVersion: 2
-        x: 290
-        y: 255
-        width: 77
-        height: 60
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_3
-      rect:
-        serializedVersion: 2
-        x: 35
-        y: 192
-        width: 82
-        height: 61
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_4
-      rect:
-        serializedVersion: 2
-        x: 162
-        y: 192
-        width: 76
-        height: 61
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_5
-      rect:
-        serializedVersion: 2
-        x: 290
-        y: 192
-        width: 78
-        height: 61
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_6
-      rect:
-        serializedVersion: 2
-        x: 33
-        y: 127
-        width: 78
-        height: 60
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_7
-      rect:
-        serializedVersion: 2
-        x: 162
-        y: 130
-        width: 88
-        height: 57
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_8
-      rect:
-        serializedVersion: 2
-        x: 290
-        y: 129
-        width: 85
-        height: 58
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_9
-      rect:
-        serializedVersion: 2
-        x: 34
-        y: 65
-        width: 88
-        height: 58
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_10
-      rect:
-        serializedVersion: 2
-        x: 162
-        y: 65
-        width: 80
-        height: 58
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_11
-      rect:
-        serializedVersion: 2
-        x: 290
-        y: 63
-        width: 84
-        height: 60
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-    - serializedVersion: 2
-      name: new_run_1_12
-      rect:
-        serializedVersion: 2
-        x: 34
+        x: 0
         y: 0
-        width: 78
-        height: 59
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_1
+      rect:
+        serializedVersion: 2
+        x: 100
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_2
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_3
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_4
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_5
+      rect:
+        serializedVersion: 2
+        x: 500
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_6
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_7
+      rect:
+        serializedVersion: 2
+        x: 700
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_8
+      rect:
+        serializedVersion: 2
+        x: 800
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_9
+      rect:
+        serializedVersion: 2
+        x: 900
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_10
+      rect:
+        serializedVersion: 2
+        x: 1000
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+    - serializedVersion: 2
+      name: Running-strip_11
+      rect:
+        serializedVersion: 2
+        x: 1100
+        y: 0
+        width: 100
+        height: 75
+      alignment: 9
+      pivot: {x: 0.4147, y: 0.5401}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []

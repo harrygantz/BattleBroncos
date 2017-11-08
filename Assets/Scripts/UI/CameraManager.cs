@@ -16,8 +16,8 @@ public class CameraManager : MonoBehaviour {
 
     //For perspective camera
     float targetZ;
-    public float zMin = 5;
-    public float zMax = 10;
+    public float zMin = 20;
+    public float zMax = 100;
 
     //Switch camera type
     Camera cam;
@@ -68,12 +68,12 @@ public class CameraManager : MonoBehaviour {
                 break;
             case CameraType.persp:
                 
-                    targetZ = -(2 * (half / 2));
+                    targetZ = -(4 * (half / 2));
 
-                if (Mathf.Abs(targetZ) < Mathf.Abs(zMax))
+                if (Mathf.Abs(targetZ) > Mathf.Abs(zMax))
                     targetZ = zMax;
 
-                if (Mathf.Abs(targetZ) > Mathf.Abs(zMin))
+                if (Mathf.Abs(targetZ) < Mathf.Abs(zMin))
                     targetZ = zMin;
 
                 cam.transform.localPosition = new Vector3(0, 0.5f, targetZ);
