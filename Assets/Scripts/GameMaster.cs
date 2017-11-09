@@ -27,13 +27,7 @@ public class GameMaster : MonoBehaviour {
  
     public void RespawnPlayer (Player player)
     {
-        Transform spawnPoint = GameObject.FindGameObjectWithTag("Level").GetComponent<Level>().spawnPoints[player.playerIndex];
-        player.gameObject.transform.position = spawnPoint.position;
-        player.gameObject.SetActive(true);
-
-        //Connect camera to new spawned players transform
-        gm.playerDead = false;
-        cm.players.Add(player.transform);
+        StartCoroutine(WaitForRespawn(1.0f, player));
     }
 
     public static void KillPlayer(Player player)
@@ -83,5 +77,16 @@ public class GameMaster : MonoBehaviour {
         cm.GetComponent<GameOver>().SetGameOver();
     }
 
+    IEnumerator WaitForRespawn(float seconds, Player player)
+    {
+        yield return new WaitForSeconds(seconds);
+        Transform spawnPoint = GameObject.FindGameObjectWithTag("Level").GetComponent<Level>().spawnPoints[player.playerIndex];
+        player.gameObject.transform.position = spawnPoint.position;
+        player.gameObject.SetActive(true);
+
+        //Connect camera to new spawned players transform
+        gm.playerDead = false;
+        cm.players.Add(player.transform);
+    }
 
 }

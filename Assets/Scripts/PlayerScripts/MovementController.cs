@@ -173,8 +173,8 @@ public class MovementController : MonoBehaviour
         {
             if (isStickingToLance)
             {
-               this._death.SetActive(true);
-                //StartCoroutine(Impact(8));
+                _player.stopInput(60);
+                deathAnimation(1.0f);
                 GameMaster.KillPlayer(GetComponent<Player>());
             }
 
@@ -783,6 +783,13 @@ public class MovementController : MonoBehaviour
             yield return new WaitForEndOfFrame();
         dashState = DashState.Ready;
         isCoolingDownDash = false;
+    }
+
+    IEnumerator deathAnimation(float seconds)
+    {
+        this._death.SetActive(true);
+        yield return new WaitForSeconds(seconds);
+        this._death.SetActive(false);
     }
 
     private bool holdingTowardsWall()
