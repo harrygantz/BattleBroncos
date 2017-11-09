@@ -25,6 +25,8 @@ public class MovementController : MonoBehaviour
     public string DashButton = "Dash_P1";
     public string HorizontalControl = "Horizontal_P1";
     public string VerticalControl = "Vertical_P1";
+    public string RightHorizontalControl = "Horizontal_Right_P1";
+    public string RightVerticalControl = "Vertical_Right_P1";
     public string ChargeAxis;
     public string DebugButton;
 
@@ -272,10 +274,26 @@ public class MovementController : MonoBehaviour
                 shouldStickToWall = false;
 
             //Left Stick
-            if (Input.GetButtonDown(DashButton) && !isCoolingDownDash)
+            if (isUsingRightStick() && !isCoolingDownDash)
             {
                 shouldDash = true;
                 shouldStickToWall = false;
+                float joystickAngle = GetRightJoystickAngle() * Mathf.Rad2Deg;
+                if (transform.localScale.x == 1)
+                {
+                    if (joystickAngle >= 0 && joystickAngle <= 90)
+                        lanceAngle = Mathf.Clamp(joystickAngle, 0, 65);
+                    else if (joystickAngle < 0 && joystickAngle >= -90)
+                        lanceAngle = Mathf.Clamp(joystickAngle, -65, 0);
+                }
+                else
+                {
+                    if (joystickAngle > 90 && joystickAngle <= 180)
+                        lanceAngle = Mathf.Clamp(joystickAngle, 115, 180);
+                    else if (joystickAngle >= -180 && joystickAngle <= -90)
+                        lanceAngle = Mathf.Clamp(joystickAngle, -180, -115);
+                }
+                _lanceRotation.RotateLance(lanceAngle);
             }
             else if (isHoldingRight() && !preventLeftRight && !shouldStickToWall) //right
             {
@@ -418,7 +436,7 @@ public class MovementController : MonoBehaviour
                     {
                         // gravity = 0;
                         _savedVelocity = _velocity;
-                        _dash = new Vector3(Mathf.Cos(GetJoystickAngle()) * dashVelocityX, Mathf.Sin(GetJoystickAngle()) * dashVelocityY);
+                        _dash = new Vector3(Mathf.Cos(GetRightJoystickAngle()) * dashVelocityX, Mathf.Sin(GetRightJoystickAngle()) * dashVelocityY);
                         if (_dash.x / (Mathf.Abs(_dash.x)) != transform.localScale.x)
                         {
                             Turnaround();
@@ -842,10 +860,25 @@ public class MovementController : MonoBehaviour
         }
     }
 
+    private bool isUsingRightStick()
+    {
+        return (
+            Input.GetAxis(RightVerticalControl) < -0.5 ||
+            Input.GetAxis(RightVerticalControl) > 0.5 ||
+            Input.GetAxis(RightHorizontalControl) < -0.5 ||
+            Input.GetAxis(RightHorizontalControl) > 0.5
+        );
+    }
+
 
     private float GetJoystickAngle()
     {
         return Mathf.Atan2(-Input.GetAxisRaw(VerticalControl), Input.GetAxisRaw(HorizontalControl));
+    }
+
+    private float GetRightJoystickAngle()
+    {
+        return Mathf.Atan2(-Input.GetAxisRaw(RightVerticalControl), Input.GetAxisRaw(RightHorizontalControl));
     }
 
     private bool JoystickInNeutral()

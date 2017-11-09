@@ -69,7 +69,7 @@ public class CameraManager : MonoBehaviour {
         maxX = Mathf.Max(players[0].position.x, players[1].position.x, players[2].position.x, players[3].position.x);
         minY = Mathf.Min(players[0].position.y, players[1].position.y, players[2].position.y, players[3].position.y);
         maxY = Mathf.Max(players[0].position.y, players[1].position.y, players[2].position.y, players[3].position.y);
-        midPoint = new Vector3((maxX + minX)/2, (maxY + minY)/2 + -17);
+        midPoint = new Vector3((maxX + minX)/2, (maxY + minY)/2 + -15);
 
         //midPoint = (players[1].position - players[0].position).normalized * half;
         // midPoint += players[0].position;
