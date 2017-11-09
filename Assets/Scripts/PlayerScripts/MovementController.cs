@@ -72,6 +72,10 @@ public class MovementController : MonoBehaviour
     public float everyFiveFrames;
     private float lanceAngle;
 
+    public GameObject DashFxObject;
+    public GameObject _death;
+
+
     public bool isWallJumping;
     //Dash Variables//
     public DashState dashState;
@@ -85,7 +89,7 @@ public class MovementController : MonoBehaviour
     private Vector3 _dash;
     private Coroutine dashingRoutine;
     //End Dash Variables//
-    private GameObject _death;
+
 
     private CharacterController2D _controller;
     private Animator _animator;
@@ -118,8 +122,7 @@ public class MovementController : MonoBehaviour
         _player = GetComponent<Player>();
         _lanceRotation = transform.Find("Lance").GetComponent<LanceRotation>();
         _cameraManager = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraManager>();
-        _FX = GameObject.FindGameObjectWithTag("FX").GetComponentInChildren<Animator>();
-        _death = GameObject.FindGameObjectWithTag("ParticleFX");
+        _FX = DashFxObject.GetComponentInChildren<Animator>();
 
         shouldJump = false;
         shouldApplyGravity = true;
@@ -138,7 +141,7 @@ public class MovementController : MonoBehaviour
     void onControllerCollider(RaycastHit2D hit)
     {
         // bail out on plain old ground hits cause they arent very interesting
-        if (isBeingKnockedBack || _controller.collisionState.above)
+        if (isBeingKnockedBack)
         {
             reflectedVelocity = Bounce(new Vector2(_velocity.x, _velocity.y), hit.normal);
             isBouncingOff = true;
@@ -159,7 +162,6 @@ public class MovementController : MonoBehaviour
                 Turnaround(true);
             }
         }
-
 
         // logs any collider hits if uncommented. it gets noisy so it is commented out for the demo
         //Debug.Log( "flags: " + _controller.collisionState + ", hit.normal: " + hit.normal );
@@ -230,6 +232,10 @@ public class MovementController : MonoBehaviour
             _animator.SetBool("playerJumping", false);
             _animator.SetBool("isGrounded", true);
             _animator.SetInteger("jumpCount", jumps = 0);
+            if (_controller.collisionState.becameGroundedThisFrame)
+            {
+                _FX.SetTrigger("FuckingDash");
+            }
         }
         else
         {
@@ -427,11 +433,13 @@ public class MovementController : MonoBehaviour
         //Move Left or Right
         if (_controller.isGrounded)
         {
+            _FX.SetTrigger("StopDash");
             speedToUse = walkSpeed;
             accelerationToUse = chargeAcceleration;
         }
         else
         {
+            _FX.SetTrigger("StopDash");
             speedToUse = airSpeed;
             accelerationToUse = airAcceleration;
         }
@@ -469,10 +477,11 @@ public class MovementController : MonoBehaviour
         {
             if (shouldMoveRight)
             {
+                if (_controller.isGrounded)
+                    _FX.SetTrigger("FuckingDash");
                 normalizedHorizontalSpeed = 1;
                 if (transform.localScale.x < 0f && _controller.isGrounded)
                 {
-                    _FX.SetTrigger("FuckingDash");
                     Turnaround();
                 }
                 else if (shouldCharge)
@@ -484,10 +493,11 @@ public class MovementController : MonoBehaviour
             }
             else if (shouldMoveLeft)
             {
+                if (_controller.isGrounded)
+                    _FX.SetTrigger("FuckingDash");
                 normalizedHorizontalSpeed = -1;
                 if (transform.localScale.x > 0 && _controller.isGrounded)
                 {
-                    _FX.SetTrigger("FuckingDash");
                     Turnaround();    
                 }
                 else if (shouldCharge)
