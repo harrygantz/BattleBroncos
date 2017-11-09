@@ -128,19 +128,16 @@ public class MovementController : MonoBehaviour
     void onControllerCollider(RaycastHit2D hit)
     {
         // bail out on plain old ground hits cause they arent very interesting
-        if (isBeingKnockedBack)
+        if (isBeingKnockedBack || _controller.collisionState.above)
         {
-            Vector2 n = hit.normal;
-            Vector2 v = _velocity;
-            reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
-            Debug.Log(hit.transform.tag + " " + reflectedVelocity);
+            reflectedVelocity = Bounce(new Vector2(_velocity.x, _velocity.y), hit.normal);
             isBouncingOff = true;
         }
 
         if (hit.normal.y == 1f)
             return;
 
-        if (hit.transform.tag == "Wall") //Using this we can't detect when we leave the wall but we want to apply checks when our player actually touches the wall
+        if (hit.transform.tag == "Wall" && !_controller.collisionState.above) //Using this we can't detect when we leave the wall but we want to apply checks when our player actually touches the wall
         {
             currentSpeed = 0;
             if (((_controller.collisionState.right && transform.localScale.x == 1) || (_controller.collisionState.left && transform.localScale.x == -1)) && !_controller.isGrounded) //player is facing wall
@@ -149,13 +146,14 @@ public class MovementController : MonoBehaviour
             }
         }
 
+
         // logs any collider hits if uncommented. it gets noisy so it is commented out for the demo
         //Debug.Log( "flags: " + _controller.collisionState + ", hit.normal: " + hit.normal );
     }
 
     void onTriggerEnterEvent(Collider2D col)
     {
-        if (col.transform.tag == "Wall" || col.transform.tag == "Ceiling")
+        if (col.transform.tag == "Wall" && !_controller.collisionState.above)
         {
             if (isStickingToLance)
                 GameMaster.KillPlayer(GetComponent<Player>());
@@ -180,7 +178,7 @@ public class MovementController : MonoBehaviour
 
     void onTriggerExitEvent(Collider2D col)
     {
-        if (col.transform.tag == "Wall" || col.transform.tag == "Ceiling")
+        if (col.transform.tag == "Wall")
         {
             collidingWithWall = (_controller.collisionState.right || _controller.collisionState.left);
             collidingWithCeiling = _controller.collisionState.above;
@@ -592,8 +590,6 @@ public class MovementController : MonoBehaviour
                 normalizedHorizontalSpeed = 0;
             else
                 normalizedHorizontalSpeed = _velocity.x < 0 ? -1 : 1;
-
-
         }
         else
         {
@@ -652,6 +648,11 @@ public class MovementController : MonoBehaviour
         _player.SetColor(Color.red, _player.hitStunFrames);
         StartCoroutine(Impact(3));
         _cameraManager.ShakeCamera(3);
+    }
+
+    public Vector2 Bounce(Vector2 velocity, Vector2 normal)
+    {
+        return (-2 * normal * Vector2.Dot(velocity, normal) + velocity);
     }
 
     IEnumerator Impact(int frames)
