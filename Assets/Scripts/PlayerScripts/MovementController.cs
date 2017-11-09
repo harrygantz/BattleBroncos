@@ -493,7 +493,7 @@ public class MovementController : MonoBehaviour
             //Jumping
             if (shouldJump)
             {
-                _velocity.y = Mathf.Sqrt(2f * jumpHeight * -gravity);
+                _velocity.y = Mathf.Sqrt(4f * jumpHeight * -gravity);
                 if (isBeingKnockedBack)
                 {
                     isBeingKnockedBack = false;
