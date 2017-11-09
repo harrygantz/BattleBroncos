@@ -29,44 +29,43 @@ public class MovementController : MonoBehaviour
     public string DebugButton;
 
     public Vector3 _velocity;
-    [HideInInspector]
 
-    private bool isBeingKnockedBack;
-    private bool isBouncingOff;
-    private bool isDashing;
-    private bool isCoolingDownDash;
-    private bool shouldDeccellerate;
-    private bool shouldJump;
-    private bool shouldWallJump;
-    private bool shouldCharge;
-    private bool shouldMoveRight;
-    private bool shouldMoveLeft;
-    private bool shouldFallThroughOneWay;
-    private bool shouldFastFall;
-    private bool shouldDash;
-    private bool shouldSlideDownWall;
-    private bool shouldResetXVelocity;
-    private bool shouldApplyGravity;
-    private bool shouldResetYVelocity;
-    private bool shouldStickToWall;
-    private bool hasStartedRunning;
-    private bool canDoubleJump;
-    private bool preventMovement;
-    private bool preventFastFall;
-    private bool preventLeftRight;
-    private bool joystickInNeutral;
-    private bool collidingWithCeiling;
-    private bool collidingWithWall;
-    private bool collidingWithSticky;
-    private bool ifDidLerp;
+    public bool isBeingKnockedBack;
+    public bool isBouncingOff;
+    public bool isDashing;
+    public bool isCoolingDownDash;
+    public bool shouldDeccellerate;
+    public bool shouldJump;
+    public bool shouldWallJump;
+    public bool shouldCharge;
+    public bool shouldMoveRight;
+    public bool shouldMoveLeft;
+    public bool shouldFallThroughOneWay;
+    public bool shouldFastFall;
+    public bool shouldDash;
+    public bool shouldSlideDownWall;
+    public bool shouldResetXVelocity;
+    public bool shouldApplyGravity;
+    public bool shouldResetYVelocity;
+    public bool shouldStickToWall;
+    public bool hasStartedRunning;
+    public bool canDoubleJump;
+    public bool preventMovement;
+    public bool preventFastFall;
+    public bool preventLeftRight;
+    public bool joystickInNeutral;
+    public bool collidingWithCeiling;
+    public bool collidingWithWall;
+    public bool collidingWithSticky;
+    public bool ifDidLerp;
 
     private int jumps = 0;
 
-    private float rotateAngle;
-    private float normalizedHorizontalSpeed = 0;
-    private float currentSpeed;
-    private float holdXVelocityForWallJump;
-    private float everyFiveFrames;
+    public float rotateAngle;
+    public float normalizedHorizontalSpeed = 0;
+    public float currentSpeed;
+    public float holdXVelocityForWallJump;
+    public float everyFiveFrames;
     private float lanceAngle;
 
     //Dash Variables//
@@ -134,6 +133,7 @@ public class MovementController : MonoBehaviour
             Vector2 n = hit.normal;
             Vector2 v = _velocity;
             reflectedVelocity = -2 * n * Vector2.Dot(v, n) + v;
+            Debug.Log(hit.transform.tag + " " + reflectedVelocity);
             isBouncingOff = true;
         }
 
@@ -581,6 +581,11 @@ public class MovementController : MonoBehaviour
 
 
         //Knockback
+        if (isBouncingOff)
+        {
+            _velocity = reflectedVelocity * bouncinessFactor;
+            isBouncingOff = false;
+        }
         if (isBeingKnockedBack) //smooth only if not being knocked back
         {
             if (_controller.isGrounded)
@@ -588,11 +593,7 @@ public class MovementController : MonoBehaviour
             else
                 normalizedHorizontalSpeed = _velocity.x < 0 ? -1 : 1;
 
-            if (isBouncingOff && _player.preventInput)
-            {
-                _velocity = reflectedVelocity * bouncinessFactor;
-                isBouncingOff = false;
-            }
+
         }
         else
         {
@@ -621,10 +622,8 @@ public class MovementController : MonoBehaviour
             velocityFiveFramesAgo = _velocity;
         }
 
-        if (collidingWithCeiling && !didWallJump)
+        if (collidingWithCeiling && !didWallJump && !isBeingKnockedBack)
             _velocity.x = 0;
-        if (collidingWithCeiling && didWallJump)
-            Debug.Log(_velocity.x);
         _controller.move(_velocity * Time.deltaTime);
         _velocity = _controller.velocity;
         velocityLastFrame = _velocity;

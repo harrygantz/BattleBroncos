@@ -33,16 +33,6 @@ public class DoesDamage : MonoBehaviour
         {
             float knockback = useVelocity ? _movement._velocity.x : intensity;
             float realAngle = angle;
-            if (useVelocity)
-            {
-                if (knockback > -1 && knockback < 1)
-                {
-                    knockback = 10;
-                    realAngle = 70f;
-                }
-                if (_movement._velocity.y < 0)
-                    realAngle = 290;
-            }
             float horzVelocity = Mathf.Cos(realAngle * Mathf.Deg2Rad) * Mathf.Abs(knockback);
             float vertVelocity = Mathf.Sin(realAngle * Mathf.Deg2Rad) * Mathf.Abs(knockback);
 
@@ -52,7 +42,7 @@ public class DoesDamage : MonoBehaviour
                 vertVelocity = 0;
             horzVelocity = horzVelocity < 0 ? Mathf.Ceil(horzVelocity) : Mathf.Floor(horzVelocity);
             vertVelocity = vertVelocity < 0 ? Mathf.Ceil(vertVelocity) : Mathf.Floor(vertVelocity);
-            Vector3 KnockbackVector = new Vector3(horzVelocity * _player.transform.localScale.x, vertVelocity, 0);
+            Vector3 KnockbackVector = _player.GetComponent<MovementController>()._velocity * 1.2f;
             otherPlayer.takeDamage(damage, KnockbackVector, gameObject, shouldStick);
         }
     }
