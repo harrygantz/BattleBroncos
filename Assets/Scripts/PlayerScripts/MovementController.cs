@@ -462,6 +462,7 @@ public class MovementController : MonoBehaviour
                 normalizedHorizontalSpeed = 1;
                 if (transform.localScale.x < 0f && _controller.isGrounded)
                 {
+                    //dash
                     Turnaround();
                 }
                 else if (shouldCharge)
@@ -476,6 +477,7 @@ public class MovementController : MonoBehaviour
                 normalizedHorizontalSpeed = -1;
                 if (transform.localScale.x > 0 && _controller.isGrounded)
                 {
+                    //dash
                     Turnaround();
                 }
                 else if (shouldCharge)
