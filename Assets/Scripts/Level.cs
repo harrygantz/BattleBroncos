@@ -27,11 +27,11 @@ public class Level : MonoBehaviour {
 
     public bool isBlasted(Transform t)
     {
-        return (
+        return ( false /* This is a hot fix for current level should change 
                  t.position.y <= (bounds.center.y - bounds.extents.y - yBlastZoneOffset) ||
                  t.position.y >= (bounds.center.y + bounds.extents.y + yBlastZoneOffset) ||
                  t.position.x <= (bounds.center.x - bounds.extents.x - xBlastZoneOffset) ||
-                 t.position.x >= (bounds.center.x + bounds.extents.x + xBlastZoneOffset)
+                 t.position.x >= (bounds.center.x + bounds.extents.x + xBlastZoneOffset) */
         );
 
     }
