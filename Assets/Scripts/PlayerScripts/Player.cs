@@ -46,7 +46,7 @@ public class Player : MonoBehaviour {
 
         _controller = GetComponent<CharacterController2D>();
         _movement = GetComponent<MovementController>();
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _spriteRenderer = transform.Find("Sprite").GetComponent<SpriteRenderer>();
 
         spriteColor = _spriteRenderer.color;
     }
