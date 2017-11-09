@@ -275,6 +275,7 @@ public class MovementController : MonoBehaviour
             if (Input.GetButtonDown(DashButton) && !isCoolingDownDash)
             {
                 shouldDash = true;
+                shouldStickToWall = false;
             }
             else if (isHoldingRight() && !preventLeftRight && !shouldStickToWall) //right
             {
@@ -417,9 +418,11 @@ public class MovementController : MonoBehaviour
                     {
                         // gravity = 0;
                         _savedVelocity = _velocity;
-                        _dash = new Vector3(Input.GetAxis(HorizontalControl) * dashVelocityX, -Input.GetAxis(VerticalControl) * dashVelocityY);
-                        if (LanceFacingWall())
+                        _dash = new Vector3(Mathf.Cos(GetJoystickAngle()) * dashVelocityX, Mathf.Sin(GetJoystickAngle()) * dashVelocityY);
+                        if (_dash.x / (Mathf.Abs(_dash.x)) != transform.localScale.x)
+                        {
                             Turnaround();
+                        }
                         _velocity = _dash;
                         dashState = DashState.Dashing;
                     }
@@ -726,6 +729,7 @@ public class MovementController : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
         dashState = DashState.Cooldown;
+        _velocity = Vector3.Normalize(_velocity) * Vector3.Magnitude(_savedVelocity);
         isDashing = false;
     }
 
