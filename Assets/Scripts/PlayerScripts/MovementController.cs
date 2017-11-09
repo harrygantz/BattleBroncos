@@ -114,11 +114,12 @@ public class MovementController : MonoBehaviour
     void Awake()
     {
         _animator = GetComponent<Animator>();
-        _FX = GameObject.FindGameObjectWithTag("FX").GetComponent<Animator>();
         _controller = GetComponent<CharacterController2D>();
         _player = GetComponent<Player>();
         _lanceRotation = transform.Find("Lance").GetComponent<LanceRotation>();
         _cameraManager = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<CameraManager>();
+        _FX = GameObject.FindGameObjectWithTag("FX").GetComponentInChildren<Animator>();
+        _death = GameObject.FindGameObjectWithTag("ParticleFX");
 
         shouldJump = false;
         shouldApplyGravity = true;
@@ -128,14 +129,9 @@ public class MovementController : MonoBehaviour
         _controller.onControllerCollidedEvent += onControllerCollider;
         _controller.onTriggerStayEvent += onTriggerStayEvent;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
-        _controller.onTriggerExitEvent += onTriggerExitEvent;
-        
+        _controller.onTriggerExitEvent += onTriggerExitEvent;       
     }
 
-    private void Start()
-    {
-        _death = GameObject.FindGameObjectWithTag("ParticleFX");
-    }
 
     #region Event Listeners
 
