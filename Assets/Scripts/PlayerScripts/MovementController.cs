@@ -489,10 +489,11 @@ public class MovementController : MonoBehaviour
             {
                 if (_controller.isGrounded)
                 {
-                    if (currentSpeed > decceleration * Time.deltaTime)
-                        currentSpeed -= decceleration * Time.deltaTime;
-                    else if (currentSpeed < -decceleration * Time.deltaTime)
-                        currentSpeed += decceleration * Time.deltaTime;
+                    //if (currentSpeed > decceleration * Time.deltaTime)
+                    //    currentSpeed -= decceleration * Time.deltaTime;
+                    //else if (currentSpeed < -decceleration * Time.deltaTime)
+                    //    currentSpeed += decceleration * Time.deltaTime;
+                    currentSpeed = 0;
                 }
                 else
                 {
@@ -582,7 +583,7 @@ public class MovementController : MonoBehaviour
             currentSpeed = horzVelocity;
             _velocity.y = vertVelocity;
 
-            _player.SetColor(Color.yellow, 20);
+           // _player.SetColor(Color.yellow, 20);
 
             // _player.StopTurnaround(10);
             StartCoroutine(freezeGravity(10));
@@ -679,7 +680,7 @@ public class MovementController : MonoBehaviour
         //list.Add(knockBackAmt.y);
         isBeingKnockedBack = true;
         _velocity = knockBackAmt;
-        _player.SetColor(Color.red, _player.hitStunFrames);
+        _player.FlashPlayer(Color.red, _player.hitStunFrames);
         StartCoroutine(Impact(3));
         _cameraManager.ShakeCamera(3);
     }
