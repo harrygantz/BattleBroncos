@@ -7,6 +7,10 @@ public class CameraManager : MonoBehaviour {
     public Transform cameraHolder;
     public List<Transform> players = new List<Transform>();
     public int speed = 5;
+    float minX;
+    float maxX;
+    float minY;
+    float maxY;
 
     Vector3 midPoint;
 
@@ -41,17 +45,44 @@ public class CameraManager : MonoBehaviour {
         //If we want to add more players we need to tag them here
         players.Add(GameObject.FindGameObjectWithTag("Player1").transform);
         players.Add(GameObject.FindGameObjectWithTag("Player2").transform);
+        players.Add(GameObject.FindGameObjectWithTag("Player3").transform);
+        players.Add(GameObject.FindGameObjectWithTag("Player4").transform);
     }
-	
-	void FixedUpdate ()
-    {
-        float distance = Vector3.Distance(players[0].position, players[1].position);
-        float half = (distance / 2);
 
-        midPoint = (players[1].position - players[0].position).normalized * half;
-        midPoint += players[0].position;
-        if (midPoint.x < -xLock || midPoint.x > xLock)
-            midPoint.x = midPoint.x < -xLock ? -xLock : xLock;
+
+    void FixedUpdate ()
+    {
+        float d1 = Vector3.Distance(players[0].position, players[1].position);
+        float d2 = Vector3.Distance(players[0].position, players[2].position);
+        float d3 = Vector3.Distance(players[0].position, players[3].position);
+        float d4 = Vector3.Distance(players[1].position, players[2].position);
+        float d5 = Vector3.Distance(players[1].position, players[3].position);
+        float d6 = Vector3.Distance(players[2].position, players[3].position);
+
+        float distance = d1 + d2 + d3 + d4 + d5 + d6; 
+
+
+        //float distance = Vector3.Distance(players[0].position, players[1].position);
+        float half = (distance / 4);
+
+        minX = Mathf.Min(players[0].position.x, players[1].position.x, players[2].position.x, players[3].position.x);
+        maxX = Mathf.Max(players[0].position.x, players[1].position.x, players[2].position.x, players[3].position.x);
+        minY = Mathf.Min(players[0].position.y, players[1].position.y, players[2].position.y, players[3].position.y);
+        maxY = Mathf.Max(players[0].position.y, players[1].position.y, players[2].position.y, players[3].position.y);
+        midPoint = new Vector3((maxX + minX)/2, (maxY + minY)/2);
+
+        Debug.Log("***********************");
+        Debug.Log("min x: " + minX);
+        Debug.Log("max x: " + maxX);
+        Debug.Log("min y: " + minY);
+        Debug.Log("max y: " + maxY);
+        Debug.Log("midpoint: " + midPoint);
+
+        //midPoint = (players[1].position - players[0].position).normalized * half;
+        // midPoint += players[0].position;
+
+        // if (midPoint.x < -xLock || midPoint.x > xLock)
+        //    midPoint.x = midPoint.x < -xLock ? -xLock : xLock;
 
         switch (cType)
         {
@@ -59,10 +90,10 @@ public class CameraManager : MonoBehaviour {
 
                 cam.orthographicSize = 2 * (half / 2);
 
-                if (cam.orthographicSize > orthoMax)
+                if (cam.orthographicSize < orthoMax)
                     cam.orthographicSize = orthoMax;
 
-                if (cam.orthographicSize < orthoMin)
+                if (cam.orthographicSize > orthoMin)
                     cam.orthographicSize = orthoMin;
 
                 break;
