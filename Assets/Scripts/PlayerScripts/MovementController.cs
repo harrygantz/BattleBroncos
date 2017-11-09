@@ -28,6 +28,8 @@ public class MovementController : MonoBehaviour
     public string ChargeAxis;
     public string DebugButton;
 
+    public GameObject WallJumpHitBox;
+
     public Vector3 _velocity;
 
     public bool isBeingKnockedBack;
@@ -68,6 +70,7 @@ public class MovementController : MonoBehaviour
     public float everyFiveFrames;
     private float lanceAngle;
 
+    public bool isWallJumping;
     //Dash Variables//
     public DashState dashState;
     public GameObject dashHitBox;
@@ -135,10 +138,14 @@ public class MovementController : MonoBehaviour
         }
 
         if (hit.normal.y == 1f)
+        {
+            isWallJumping = false;
             return;
+        }
 
         if (hit.transform.tag == "Wall" && !_controller.collisionState.above) //Using this we can't detect when we leave the wall but we want to apply checks when our player actually touches the wall
         {
+            isWallJumping = false;
             currentSpeed = 0;
             if (((_controller.collisionState.right && transform.localScale.x == 1) || (_controller.collisionState.left && transform.localScale.x == -1)) && !_controller.isGrounded) //player is facing wall
             {
@@ -401,9 +408,9 @@ public class MovementController : MonoBehaviour
         }
 
         // Dash ability 
-        bool didWallJump = false;
         if (shouldDash)
         {
+            isWallJumping = false;
             switch (dashState)
             {
                 case DashState.Ready:
@@ -490,6 +497,7 @@ public class MovementController : MonoBehaviour
                     _velocity.x = 0;
                 }
                 StartCoroutine(freezeFastFall(10));
+                isWallJumping = false;
                 shouldJump = false;
             }
 
@@ -553,14 +561,13 @@ public class MovementController : MonoBehaviour
             currentSpeed = horzVelocity;
             _velocity.y = vertVelocity;
 
-            StartCoroutine(setHitbox(20, transform.Find("Hitboxes").Find("WallJump").gameObject));
             _player.SetColor(Color.yellow, 20);
 
             // _player.StopTurnaround(10);
             StartCoroutine(freezeGravity(10));
             StartCoroutine(freezeFastFall(10));
             holdXVelocityForWallJump = 0;
-            didWallJump = true;
+            isWallJumping = true;
             shouldApplyGravity = false;
             shouldWallJump = false;
         }
@@ -586,6 +593,7 @@ public class MovementController : MonoBehaviour
         }
         if (isBeingKnockedBack) //smooth only if not being knocked back
         {
+            isWallJumping = false;
             if (_controller.isGrounded)
                 normalizedHorizontalSpeed = 0;
             else
@@ -594,7 +602,7 @@ public class MovementController : MonoBehaviour
         else
         {
             currentSpeed = Mathf.Clamp(currentSpeed, -maxSpeed, maxSpeed);
-            if (didWallJump)
+            if (isWallJumping)
             {
                 _velocity.x = currentSpeed;
             }
@@ -604,6 +612,12 @@ public class MovementController : MonoBehaviour
             }
         }
 
+        if (isWallJumping)
+        {
+            WallJumpHitBox.SetActive(true);
+        }
+        else
+            WallJumpHitBox.SetActive(false);
 
         if (shouldApplyGravity && !isDashing)
             _velocity.y += gravityToUse * Time.deltaTime;
@@ -618,13 +632,12 @@ public class MovementController : MonoBehaviour
             velocityFiveFramesAgo = _velocity;
         }
 
-        if (collidingWithCeiling && !didWallJump && !isBeingKnockedBack)
+        if (collidingWithCeiling && !isWallJumping && !isBeingKnockedBack)
             _velocity.x = 0;
         _controller.move(_velocity * Time.deltaTime);
         _velocity = _controller.velocity;
         velocityLastFrame = _velocity;
         //shouldApplyGravity = true;
-        didWallJump = false;
 
     }
 
