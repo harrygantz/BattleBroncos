@@ -85,9 +85,11 @@ public class MovementController : MonoBehaviour
     private Vector3 _dash;
     private Coroutine dashingRoutine;
     //End Dash Variables//
+    private GameObject _death;
 
     private CharacterController2D _controller;
     private Animator _animator;
+    private Animator _FX;
     private RaycastHit2D _lastControllerColliderHit;
     private Player _player;
     private Transform playerTransform;
@@ -112,6 +114,7 @@ public class MovementController : MonoBehaviour
     void Awake()
     {
         _animator = GetComponent<Animator>();
+        _FX = GameObject.FindGameObjectWithTag("FX").GetComponent<Animator>();
         _controller = GetComponent<CharacterController2D>();
         _player = GetComponent<Player>();
         _lanceRotation = transform.Find("Lance").GetComponent<LanceRotation>();
@@ -126,6 +129,12 @@ public class MovementController : MonoBehaviour
         _controller.onTriggerStayEvent += onTriggerStayEvent;
         _controller.onTriggerEnterEvent += onTriggerEnterEvent;
         _controller.onTriggerExitEvent += onTriggerExitEvent;
+        
+    }
+
+    private void Start()
+    {
+        _death = GameObject.FindGameObjectWithTag("ParticleFX");
     }
 
     #region Event Listeners
@@ -165,7 +174,11 @@ public class MovementController : MonoBehaviour
         if (col.transform.tag == "Wall" && !_controller.collisionState.above)
         {
             if (isStickingToLance)
+            {
+               this._death.SetActive(true);
+                //StartCoroutine(Impact(8));
                 GameMaster.KillPlayer(GetComponent<Player>());
+            }
 
             collidingWithWall = _controller.collisionState.right || _controller.collisionState.left;
             collidingWithCeiling = _controller.collisionState.above;
@@ -410,6 +423,7 @@ public class MovementController : MonoBehaviour
         float gravityToUse = gravity;
         float speedToUse;
         float accelerationToUse;
+        
 
         normalizedHorizontalSpeed = 0;
         var smoothedMovementFactor = _controller.isGrounded ? groundDamping : inAirDamping; //how fast do we change direction?
@@ -462,7 +476,7 @@ public class MovementController : MonoBehaviour
                 normalizedHorizontalSpeed = 1;
                 if (transform.localScale.x < 0f && _controller.isGrounded)
                 {
-                    //dash
+                    _FX.SetTrigger("FuckingDash");
                     Turnaround();
                 }
                 else if (shouldCharge)
@@ -477,8 +491,8 @@ public class MovementController : MonoBehaviour
                 normalizedHorizontalSpeed = -1;
                 if (transform.localScale.x > 0 && _controller.isGrounded)
                 {
-                    //dash
-                    Turnaround();
+                    _FX.SetTrigger("FuckingDash");
+                    Turnaround();    
                 }
                 else if (shouldCharge)
                 {
